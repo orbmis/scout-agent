@@ -1,0 +1,40 @@
+{
+  "_comment": "RSS feeds polled by rss-scan.sh. Feed URLs may need updating if sites change RSS paths. category_filter applies post-fetch on feed item categories or URL path. max_items_per_run caps volume from chatty sources.",
+  "research_outputs": [
+    {"name": "Flashbots Writings", "url": "https://writings.flashbots.net/rss.xml", "max_items_per_run": 10},
+    {"name": "Paradigm Research", "url": "https://www.paradigm.xyz/feed.xml", "max_items_per_run": 10},
+    {"name": "a16z crypto", "url": "https://a16zcrypto.com/feed/", "max_items_per_run": 10},
+    {"name": "Galaxy Research", "url": "https://www.galaxy.com/research/feed", "max_items_per_run": 10}
+  ],
+  "newsletters": [
+    {"name": "Bankless", "url": "https://www.bankless.com/feed", "max_items_per_run": 5, "tag": "newsletter"},
+    {"name": "Daily Gwei", "url": "https://thedailygwei.substack.com/feed", "max_items_per_run": 5, "tag": "newsletter"},
+    {"name": "The Defiant - Blockchains", "url": "https://thedefiant.io/feed", "max_items_per_run": 5, "category_filter": "Blockchains", "url_path_filter": "/blockchains/", "tag": "newsletter"}
+  ],
+  "core_protocol": [
+    {"name": "Ethereum Blog", "url": "https://blog.ethereum.org/en/feed.xml", "max_items_per_run": 10},
+    {"name": "Vitalik Blog", "url": "https://vitalik.eth.limo/feed.xml", "max_items_per_run": 10}
+  ],
+  "company_blogs": [
+    {"name": "Crossmint", "url": "https://www.crossmint.com/blog/rss.xml", "max_items_per_run": 5},
+    {"name": "Privy", "url": "https://www.privy.io/blog/rss.xml", "max_items_per_run": 5},
+    {"name": "Turnkey", "url": "https://www.turnkey.com/blog/rss.xml", "max_items_per_run": 5},
+    {"name": "Pimlico", "url": "https://www.pimlico.io/blog/rss.xml", "max_items_per_run": 5},
+    {"name": "ZeroDev", "url": "https://blog.zerodev.app/rss.xml", "max_items_per_run": 5},
+    {"name": "Alchemy", "url": "https://www.alchemy.com/blog/rss.xml", "max_items_per_run": 5},
+    {"name": "Safe", "url": "https://safe.global/blog/rss.xml", "max_items_per_run": 5},
+    {"name": "Coinbase Developer", "url": "https://www.coinbase.com/developer-platform/discover/rss", "max_items_per_run": 5},
+    {"name": "Stripe", "url": "https://stripe.com/blog/feed.rss", "max_items_per_run": 5},
+    {"name": "OpenAI", "url": "https://openai.com/blog/rss.xml", "max_items_per_run": 5},
+    {"name": "Lightning Labs", "url": "https://lightning.engineering/feed.xml", "max_items_per_run": 5},
+    {"name": "Breez", "url": "https://breez.technology/blog/rss.xml", "max_items_per_run": 5},
+    {"name": "Skyfire", "url": "https://skyfire.xyz/blog/rss.xml", "max_items_per_run": 5}
+  ],
+  "forums": [
+    {"name": "ethresear.ch - Account Abstraction", "url": "https://ethresear.ch/c/account-abstraction/45.rss", "max_items_per_run": 15},
+    {"name": "ethresear.ch - Layer 2", "url": "https://ethresear.ch/c/layer-2/32.rss", "max_items_per_run": 15},
+    {"name": "ethresear.ch - Cryptography", "url": "https://ethresear.ch/c/cryptography/15.rss", "max_items_per_run": 15},
+    {"name": "ethresear.ch - Economics", "url": "https://ethresear.ch/c/economics/10.rss", "max_items_per_run": 15},
+    {"name": "Ethereum Magicians", "url": "https://ethereum-magicians.org/latest.rss", "max_items_per_run": 20}
+  ]
+}

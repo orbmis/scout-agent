@@ -1,0 +1,47 @@
+{
+  "_comment": "Seed authors are used to expand discovery, not filter output. Items from these authors are flagged is_seed_author=true; replies/quotes/reposts from them flag seed_engaged_by. Update via Scout's rising-authors workflow or manual edits.",
+  "categories": {
+    "aa_standards": [
+      {"handle": "VitalikButerin", "note": "Vitalik Buterin"},
+      {"handle": "yoavw", "note": "Yoav Weiss - ERC-4337 co-author"},
+      {"handle": "kristofgazso", "note": "Kristof Gazso - ERC-4337 co-author, Pimlico"},
+      {"handle": "noamhurwitz", "note": "Noam Hurwitz - Alchemy AA"},
+      {"handle": "danfinlay", "note": "Dan Finlay - MetaMask, delegation"},
+      {"handle": "derekchiang", "note": "Derek Chiang - ZeroDev"}
+    ],
+    "agent_payments": [
+      {"handle": "erikreppel", "note": "Erik Reppel - Coinbase Developer Platform, x402"},
+      {"handle": "amirsarhangi", "note": "Amir Sarhangi - Skyfire"},
+      {"handle": "roasbeef", "note": "Olaoluwa Osuntokun - Lightning Labs, L402"},
+      {"handle": "brian_armstrong", "note": "Brian Armstrong - Coinbase"},
+      {"handle": "patrickc", "note": "Patrick Collison - Stripe"},
+      {"handle": "gdb", "note": "Greg Brockman - OpenAI"}
+    ],
+    "ethereum_core": [
+      {"handle": "drakefjustin", "note": "Justin Drake - EF"},
+      {"handle": "dankrad", "note": "Dankrad Feist - EF"},
+      {"handle": "TimBeiko", "note": "Tim Beiko - EF, hardfork coordination"},
+      {"handle": "mikeneuder", "note": "Mike Neuder - EF"},
+      {"handle": "nero_eth", "note": "Toni Wahrstätter - EF"},
+      {"handle": "barnabemonnot", "note": "Barnabé Monnot - EF"},
+      {"handle": "christine_dkim", "note": "Christine Kim - Galaxy"}
+    ],
+    "mev": [
+      {"handle": "phildaian", "note": "Phil Daian - Flashbots"},
+      {"handle": "hasufl", "note": "Hasu"},
+      {"handle": "bertcmiller", "note": "Robert Miller"},
+      {"handle": "stephanegosselin", "note": "Stephane Gosselin - Frontier Research"}
+    ],
+    "agentic_ai_x_crypto": [
+      {"handle": "shawmakesmagic", "note": "Shaw - ai16z / Eliza"},
+      {"handle": "a16zcrypto", "note": "a16z crypto research"}
+    ],
+    "analysts": [
+      {"handle": "sassal0x", "note": "Anthony Sassano"},
+      {"handle": "RyanSAdams", "note": "Ryan Sean Adams - Bankless"},
+      {"handle": "TrustlessState", "note": "David Hoffman - Bankless"},
+      {"handle": "jon_charb", "note": "Jon Charbonneau - DBA"},
+      {"handle": "MikeIppolito_", "note": "Mike Ippolito"}
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "eip_numbers": [4337, 7702, 7579, 7710, 7715, 7521, 7683, 8211],
+  "eip_pattern": "\\b(?:ERC|EIP)-?(?:4337|7702|7579|7710|7715|7521|7683|8211|6900|6492)\\b",
+  "protocols": [
+    "x402",
+    "L402",
+    "ACP",
+    "AP2",
+    "TAP",
+    "Agent Pay",
+    "Visa TAP",
+    "Mastercard Agent Pay",
+    "Agentic Commerce Protocol"
+  ],
+  "companies": {
+    "agent_wallets": ["Sponge", "Crossmint", "Coinbase Agent", "Coinbase Agentic"],
+    "signing_infra": ["Turnkey", "Privy", "Lit Protocol", "Web3Auth"],
+    "card_issuance": ["Lithic", "Marqeta", "Stripe Issuing"],
+    "identity": ["Skyfire", "Verax", "EAS", "Ethereum Attestation"],
+    "aa_infra": ["Pimlico", "ZeroDev", "Alchemy", "Safe", "Biconomy", "Stackup"],
+    "agentic_ai_x_crypto": ["ai16z", "Eliza", "Virtuals", "Karma3", "OpenRank"]
+  },
+  "technical_markers": [
+    "smart account",
+    "smart wallet",
+    "account abstraction",
+    "session key",
+    "passkey",
+    "MPC wallet",
+    "threshold signature",
+    "intent",
+    "solver",
+    "delegated execution",
+    "userOperation",
+    "userop",
+    "EntryPoint",
+    "bundler",
+    "paymaster",
+    "verifiable credential",
+    "attestation"
+  ],
+  "anchor_domains": [
+    "eips.ethereum.org",
+    "ethereum-magicians.org",
+    "ethresear.ch",
+    "github.com/ethereum/EIPs",
+    "github.com/eth-infinitism",
+    "github.com/erc7579",
+    "blog.ethereum.org",
+    "vitalik.eth.limo",
+    "notes.ethereum.org",
+    "writings.flashbots.net",
+    "paradigm.xyz",
+    "a16zcrypto.com",
+    "galaxy.com",
+    "arxiv.org"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "blocked_subreddits": [
+    "Shortsqueeze",
+    "pennystocks",
+    "wallstreetbets",
+    "CryptoMoonShots",
+    "SatoshiStreetBets",
+    "trading212",
+    "LeopardsAteMyFace",
+    "politics",
+    "Conservative",
+    "Liberal",
+    "Republican",
+    "Democrats",
+    "RZLV",
+    "GME",
+    "AMC",
+    "BBBY"
+  ],
+  "blocked_subreddit_patterns": [
+    "^[A-Z]{2,5}$"
+  ],
+  "blocked_text_patterns": [
+    "\\$[A-Z]{2,5}\\b",
+    "(🚀|💎|🔥|🌙){3,}",
+    "\\b10x\\b",
+    "\\b100x\\b",
+    "to the moon",
+    "Palantir 2\\.0",
+    "next [A-Za-z]+ killer",
+    "\\bBANGER\\b",
+    "\\bmoonshot\\b",
+    "DM (for|me)",
+    "join my (channel|group)",
+    "link in bio",
+    "ARR (projection|exit)",
+    "under the radar",
+    "guaranteed (returns?|profit)",
+    "pump and dump"
+  ],
+  "blocked_account_rules": {
+    "min_account_age_days": 30,
+    "max_posts_per_day_for_new_account": 20,
+    "ticker_in_handle_regex": "\\$[A-Z]{2,5}"
+  },
+  "noise_reply_patterns": [
+    "^solid analysis",
+    "^this is huge",
+    "^this is amazing",
+    "^great point",
+    "^well said",
+    "^💯+$",
+    "^\\+1$",
+    "^bullish$",
+    "^bearish$"
+  ]
+}

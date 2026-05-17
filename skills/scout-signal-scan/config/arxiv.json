@@ -1,0 +1,30 @@
+{
+  "_comment": "arxiv categories polled by arxiv-scan.sh. Keyword filter applied to title+abstract. Volume is high; filter aggressively.",
+  "categories": [
+    "cs.CR",
+    "cs.DC",
+    "cs.MA",
+    "cs.GT"
+  ],
+  "keyword_filter": [
+    "account abstraction",
+    "smart account",
+    "smart wallet",
+    "agent payment",
+    "machine-to-machine payment",
+    "MPC wallet",
+    "threshold signature",
+    "session key",
+    "passkey",
+    "delegated execution",
+    "agent delegation",
+    "verifiable credential",
+    "attestation",
+    "agent identity",
+    "intent-based",
+    "solver network",
+    "MEV",
+    "block building"
+  ],
+  "base_url": "https://export.arxiv.org/rss"
+}
