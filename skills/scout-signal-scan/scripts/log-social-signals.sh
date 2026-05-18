@@ -63,7 +63,7 @@ run_collector() {
 }
 
 run_collector "reddit-scan" "$TMP/reddit.json" bash "$SCRIPT_DIR/reddit-scan.sh" "$QUERY" "$REDDIT_HOURS"
-run_collector "x-seed-scan" "$TMP/seed.json"   bash "$SCRIPT_DIR/x-seed-scan.sh" "$SEED_HOURS"
+run_collector "x-list-scan" "$TMP/seed.json"   bash "$SCRIPT_DIR/x-list-scan.sh" "$SEED_HOURS"
 run_collector "rss-scan"    "$TMP/rss.json"    bash "$SCRIPT_DIR/rss-scan.sh" "$RSS_HOURS"
 run_collector "github-scan" "$TMP/github.json" bash "$SCRIPT_DIR/github-scan.sh" "$GITHUB_HOURS"
 run_collector "arxiv-scan"  "$TMP/arxiv.json"  bash "$SCRIPT_DIR/arxiv-scan.sh" "$ARXIV_HOURS"
@@ -76,7 +76,6 @@ echo "[]" > "$TELEGRAM_JSON"
 TELEGRAM_DIAG='{"channels_scanned":0,"channels_with_activity":0,"items_kept":0,"status":"script_missing"}'
 if [[ -x "$TELEGRAM_SCRIPT" ]]; then
   if "$TELEGRAM_SCRIPT" 4 > "$TELEGRAM_RAW" 2>/dev/null; then
-    # Best-effort: telegram script outputs lines we wrap as items
     if [[ -s "$TELEGRAM_RAW" ]]; then
       jq -nR --slurpfile lines <(grep -E '^- ' "$TELEGRAM_RAW" || true) \
         '[ $lines[0][] | select(. != "") | { source: "telegram", subsource: "telegram-group", url: "", title: ., text: ., author: {handle: "telegram"}, engagement: {}, created_at: "", metadata: { has_eip_reference: false, eip_numbers: [], has_code_block: false, anchor_domain_links: [], tracked_companies: [], tracked_protocols: [], technical_markers: [] } } ]' \
@@ -125,7 +124,6 @@ DIAGNOSTICS=$(jq -nc \
   }')
 
 # Build the manifest
-# Note: previous_signals_files lists files from the last 14 days the agent should use for topic-level dedup
 PREV_FILES=$(find "$SIGNALS_DIR" -name "????-??-??.md" -type f -mtime -14 2>/dev/null | sort | jq -R . | jq -sc .)
 
 # Day-of-week for weekly report flag (1=Mon..7=Sun)
@@ -164,7 +162,6 @@ jq -nc \
     items: $new_items
   }' > "$MANIFEST_FILE"
 
-# Drop the marker so the agent (or a downstream cron) knows it's ready
 touch "$MARKER_FILE"
 
 echo "[orchestrator] manifest written: $MANIFEST_FILE" >&2

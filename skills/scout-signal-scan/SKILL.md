@@ -1,6 +1,6 @@
 ---
 name: scout-signal-scan
-description: Run the orchestrated multi-source signal collection pipeline for Scout. Polls allowlisted Reddit subreddits (substantive technical subs only), X seed-author timelines, RSS feeds (research outputs, newsletters, company blogs, forums, core protocol), GitHub releases and EIP commits, arxiv categories with keyword filter, and Telegram. Applies hard negative filters at collection time. Dedups against a rolling 14-day URL store. Emits a JSON manifest the agent processes per AGENTS.md to produce the tiered daily signal file.
+description: Run the orchestrated multi-source signal collection pipeline for Scout. Polls allowlisted Reddit subreddits, an X List of seed authors, RSS feeds (research outputs, newsletters, company blogs, forums, core protocol), GitHub releases and EIP commits, arxiv categories with keyword filter, and Telegram. Applies hard negative filters at collection time. Dedups against a rolling 14-day URL store. Emits a JSON manifest the agent processes per AGENTS.md to produce the tiered daily signal file.
 ---
 
 # scout-signal-scan
@@ -22,16 +22,19 @@ Wire this into cron at 08:00 UTC. The agent should be triggered shortly after (0
 Each can be run standalone for testing or debugging. All emit a JSON array of items to stdout and diagnostics to stderr.
 
 ```bash
-bash scripts/reddit-scan.sh "<query>" <hours>   # allowlisted subreddits (formerly social-scan-portable)
-bash scripts/x-seed-scan.sh <hours>             # seed-author X timelines
+bash scripts/reddit-scan.sh "<query>" <hours>   # allowlisted subreddits
+bash scripts/x-list-scan.sh <hours>             # X List of seed authors
 bash scripts/rss-scan.sh <hours>                # RSS feeds (research/newsletters/blogs/forums)
 bash scripts/github-scan.sh <hours>             # releases + EIP commits
 bash scripts/arxiv-scan.sh <hours>              # arxiv categories with keyword filter
 ```
 
-### Note on retired collectors
+### Retired collectors
 
-`social-scan-portable.sh` (mixed Reddit + X keyword search) has been retired. The X keyword half duplicated `x-seed-scan.sh` for accounts of interest and produced noisy discovery for unknown accounts. The Reddit half has been replaced by `reddit-scan.sh`, which polls a small allowlist of substantive subreddits (r/ethereum, r/ethdev, r/ethfinance, r/ethstaker, r/MachineLearning, r/LocalLLaMA) instead of site-wide keyword search.
+- `social-scan-portable.sh` (mixed Reddit + X keyword search) — retired. The X keyword half duplicated seed-author coverage for accounts of interest and produced noisy discovery for unknown accounts. The Reddit half was replaced by `reddit-scan.sh`, scoped to a small allowlist of substantive subreddits.
+- `x-seed-scan.sh` (per-handle X timeline scanning) — retired. The per-handle approach required keeping `seed-authors.json` in sync with editorial intent and made ~60 API calls per run. Replaced by `x-list-scan.sh`, which reads a single X List with one API call. Seed curation now happens in the X UI rather than in JSON.
+
+The retired scripts are kept on disk with a `.retired` suffix for rollback purposes.
 
 ## Configuration
 
@@ -39,7 +42,8 @@ All source lists and filters live in `config/`. These are the runtime source of 
 
 - `config/negative-filters.json` — subreddit blocklist, regex patterns, account shape rules. Patterns use POSIX extended regex syntax (no `(?:...)` non-capturing groups; use `(...)` instead)
 - `config/tracked-entities.json` — EIPs, protocols, companies, technical markers, anchor domains
-- `config/seed-authors.json` — X handles grouped by category
+- `config/x-list.json` — X List ID and metadata. The List itself, edited in the X app, is the runtime source of truth for who Scout watches on X
+- `config/seed-authors.json` — editorial reference mapping X handles to categories (aa_standards, agent_payments, etc.). No longer determines who gets scanned (the List does that); used by x-list-scan to enrich items with `seed_category`. Handles in the List but not here get `seed_category: "uncategorised"`
 - `config/feeds.json` — RSS feeds with per-source caps and category filters
 - `config/github-repos.json` — repos for release watch and EIP file watch
 - `config/arxiv.json` — categories and keyword filter
@@ -50,16 +54,13 @@ The Reddit allowlist is embedded in `scripts/reddit-scan.sh` rather than a confi
 
 See `references/MANIFEST_SCHEMA.md`. Current schema version: **1.1**. Every field is a factual observation; the skill never emits scores, tier assignments, or interpretations. Those are the agent's job.
 
-Schema 1.1 changes from 1.0:
-- Removed `source: "x"` (keyword X search retired); `source: "x-seed"` covers all X items now
-- `collection_diagnostics.social_keyword` renamed to `collection_diagnostics.reddit`
-- `window_hours` expanded from a single value to per-collector windows
+X items still carry `source: "x-seed"` even though they now come from the List rather than per-handle scanning. The semantic ("this came from a seed-set author") is unchanged; only the mechanism behind it changed. This avoids a manifest schema break.
 
 ## Environment
 
 The orchestrator sources `~/.config/social-scan/.env` at startup, so all child collectors inherit secrets and tokens. Set:
 
-- `X_BEARER_TOKEN` — required for x-seed-scan. X Basic tier needed (free tier lacks the user-timeline endpoint)
+- `X_BEARER_TOKEN` — required for x-list-scan. X Basic tier (or pay-per-use) needed for the List Tweets endpoint
 - `GITHUB_TOKEN` — optional but recommended. Raises GitHub API rate limit from 60/hour to 5000/hour
 
 Other variables (with sensible defaults):
@@ -73,7 +74,7 @@ Other variables (with sensible defaults):
 Per-collector time windows (override via env if needed):
 
 - `REDDIT_HOURS` (default 24)
-- `SEED_HOURS` (default 24)
+- `SEED_HOURS` (default 24) — applies to x-list-scan
 - `RSS_HOURS` (default 48)
 - `GITHUB_HOURS` (default 24)
 - `ARXIV_HOURS` (default 48)
@@ -82,11 +83,15 @@ Full setup details in `references/SETUP.md`.
 
 ## Known behaviour worth understanding
 
-**arxiv on weekends:** arxiv does not publish new items on Saturdays or Sundays (the feed itself declares `<skipDays>Saturday Sunday</skipDays>`). Zero items kept from the arxiv collector on Sat/Sun is expected, not a failure. AGENTS.md instructs the agent to treat this as a legitimate empty-tier diagnostic rather than a collection issue.
+**X List must be public.** `x-list-scan.sh` uses bearer-token (app-only) authentication. Reading a private List requires OAuth user-context flow, which Scout's auth setup does not currently implement. If you make the List private, the script will fail with a 403.
 
-**Reddit's structural tier ceiling:** Reddit items lack the seed-authorship and seed-engagement signals available on X. Reddit items will essentially only ever reach Tier 3, because the agent's threshold rule requires content specificity alone to clear the bar for Reddit. This is encoded in the source-to-tier mapping in `references/MANIFEST_SCHEMA.md`.
+**Link-only tweets have thin metadata.** Tweets that are just a URL (often pointing to an X Article or another tweet) return only the URL as text. The metadata extraction works on whatever text and expanded URLs the API returns; if the substance lives behind the link, it won't appear in the manifest's `metadata` fields. The agent should use `is_seed_author: true` plus `engagement` signals to decide whether to surface these even when metadata is empty.
 
-**EIP pattern allowlist (under review):** The `eip_pattern` in `config/tracked-entities.json` currently matches only a fixed allowlist of EIP numbers (4337, 7702, 7579, 7710, 7715, 7521, 7683, 8211, 6900, 6492). Commits to other EIPs in the github collector will have `has_eip_reference: false` and empty `eip_numbers`. Broadening the pattern is on the maintenance list and should be revisited.
+**arxiv on weekends.** arxiv does not publish new items on Saturdays or Sundays (declared in `<skipDays>` in the feed). Zero items kept from the arxiv collector on Sat/Sun is expected, not a failure.
+
+**Reddit's structural tier ceiling.** Reddit items lack the seed-authorship and seed-engagement signals available on X. Reddit items will essentially only ever reach Tier 3, because the agent's threshold rule requires content specificity alone to clear the bar for Reddit.
+
+**EIP pattern allowlist (under review).** The `eip_pattern` in `config/tracked-entities.json` currently matches only a fixed allowlist of EIP numbers (4337, 7702, 7579, 7710, 7715, 7521, 7683, 8211, 6900, 6492). Commits to other EIPs in the github collector will have `has_eip_reference: false` and empty `eip_numbers`. Broadening the pattern is on the maintenance list.
 
 ## What the agent must do with the manifest
 
@@ -108,13 +113,13 @@ The orchestrator captures per-collector stderr and surfaces it in `collection_di
 
 ```
 [reddit-scan] subs_polled=6 successful=6 raw=42 kept=18
-[x-seed-scan] processed 28/30 handles
+[x-list-scan] tweets_returned=97 kept=10 dropped_timewindow=86 dropped_filters=1
 [rss-scan] feeds_polled=27 successful=26 failed=1
 [github-scan] repos_polled=10 releases=0 eip_changes=2
 [arxiv-scan] cats_polled=4 items_kept=0
 ```
 
-Total wall-clock for a healthy run is typically 60-120 seconds, dominated by RSS fetches. If runs trend above 180s on the cron schedule, check `~/.config/social-scan/.env` is being sourced and individual collector timings via the per-collector test invocations.
+Total wall-clock for a healthy run is typically 60-90 seconds, dominated by RSS fetches. x-list-scan completes in a few seconds (single API call) compared to ~24 seconds for the retired x-seed-scan's per-handle approach. If runs trend above 180s on cron, check `~/.config/social-scan/.env` is being sourced and individual collector timings via the per-collector test invocations.
 
 ## Notes for reuse
 
@@ -123,3 +128,5 @@ Total wall-clock for a healthy run is typically 60-120 seconds, dominated by RSS
 - Per-source RSS caps prevent any single feed dominating the manifest
 - The Defiant feed is filtered to its Blockchains category only (see feeds.json)
 - All scripts surface diagnostics to stderr; the orchestrator captures these into the manifest's `collection_diagnostics`
+- Adding a new X account to watch: add them to the List in the X app. No code or config edit needed unless you want them categorised (in which case add to `seed-authors.json`)
+

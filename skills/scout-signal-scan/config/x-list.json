@@ -1,0 +1,7 @@
+{
+  "_comment": "Source of truth for X seed coverage. The List is editable via X's UI (web or mobile app). Add or remove members in the X app; the next collection run reflects the change without code edits. The List must be public for bearer-token-based API access; if you make it private, the script will fail and you'll need to switch to OAuth user-context auth. seed-authors.json is now an editorial reference that maps handles to categories (aa_standards, agent_payments, etc.); it does NOT determine who gets scanned. The List determines that.",
+  "list_id": "2056288007821357186",
+  "list_url": "https://x.com/i/lists/2056288007821357186",
+  "list_owner_handle": "orbmis",
+  "max_results": 100
+}
