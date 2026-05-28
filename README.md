@@ -23,7 +23,7 @@ Two halves, decoupled by a JSON manifest:
 
 1. **Collection (scout-signal-scan skill).** Runs on cron at 08:00 UTC. Polls six channels (allowlisted Reddit subs, X List of seed authors, RSS feeds, GitHub releases and EIP commits, arxiv categories, Telegram). Applies hard negative filters at collection time. Enriches each item with metadata flags (EIP references, anchor-domain links, tracked companies, protocols, technical markers). Dedups against a rolling 14-day URL store. Writes a JSON manifest at `/tmp/scout/manifest-YYYY-MM-DD.json` and creates a marker file `/tmp/scout/ready-YYYY-MM-DD.marker`.
 
-2. **Agent processing (Scout itself).** Triggered by the marker file. Reads the manifest. Applies a four-axis scoring framework (content specificity, author shape, network engagement, negative markers). Assigns each surviving item to Tier 0 (primary source), Tier 1 (seed-author), Tier 2 (seed-engaged), or Tier 3 (independent). Applies topic-level dedup against the previous 14 days of signal files. Annotates items that materially connect to Simon's active writing focus per USER.md. Writes the daily file plus a `YYYY-MM-DD_filtered.md` audit file for excluded items. Appends new Tier 3 authors to the rising-authors state. On Sundays, also writes the weekly rising-authors report. Deletes the marker file on success.
+2. **Agent processing (Scout itself).** Triggered by the marker file. Reads the manifest. Applies a four-axis scoring framework (content specificity, author shape, network engagement, negative markers). Assigns each surviving item to Tier 0 (primary source), Tier 1 (seed-author), Tier 2 (seed-engaged), or Tier 3 (independent). Applies topic-level dedup against the previous 14 days of signal files. Annotates items that materially connect to Simon's active writing focus per USER.md. Writes the daily file. Appends new Tier 3 authors to the rising-authors state. On Sundays, also writes the weekly rising-authors report. Deletes the marker file on success.
 
 The skill is mechanical; the agent is editorial. Neither does the other's job.
 
@@ -35,6 +35,9 @@ workspace-saorin-scout/
 ├── SOUL.md                                  # Scout's identity (read by agent)
 ├── AGENTS.md                                # operational rules (read by agent)
 ├── USER.md                                  # writing focus + hypotheses (read by agent)
+│
+├── scripts/
+│   └── telegram-group-scan.sh.retired       # former external-repo Telegram wrapper (superseded)
 │
 └── skills/
     ├── reddit-readonly/                     # Reddit API wrapper used by reddit-scan.sh
@@ -50,6 +53,7 @@ workspace-saorin-scout/
         │   ├── github-repos.json
         │   ├── negative-filters.json
         │   ├── seed-authors.json            # editorial reference (handle → category)
+        │   ├── telegram-channels.json       # Telegram channels + venv/session paths
         │   ├── tracked-entities.json
         │   └── x-list.json                  # X List ID (runtime source for X coverage)
         ├── references/
@@ -63,10 +67,12 @@ workspace-saorin-scout/
             ├── rss-scan.sh                  # RSS feeds (research, newsletters, blogs, forums)
             ├── github-scan.sh               # GitHub releases + EIP commits
             ├── arxiv-scan.sh                # arxiv categories with keyword filter
+            ├── telegram-scan.sh             # Telegram channels (via in-skill Telethon)
             ├── x-seed-scan.sh.retired       # per-handle approach (rollback)
             └── lib/
                 ├── filters.sh               # shared negative filtering + metadata
-                └── state.sh                 # rolling URL dedup
+                ├── state.sh                 # rolling URL dedup
+                └── telegram_fetch.py        # Telethon fetcher (folded in from telegram-sync)
 ```
 
 External paths Scout reads from or writes to:
@@ -81,11 +87,10 @@ External paths Scout reads from or writes to:
 └── tier3-authors.jsonl                      # agent-managed, append-only
 
 ~/.config/social-scan/                       # secrets
-└── .env                                     # X_BEARER_TOKEN, GITHUB_TOKEN
+└── .env                                     # X_BEARER_TOKEN, GITHUB_TOKEN, TELEGRAM_API_ID, TELEGRAM_API_HASH
 
-~/obsidian-vault/Signals/       # agent output
+/home/clawdbot/obsidian-vault/Signals/       # agent output
 ├── YYYY-MM-DD.md                            # daily signal file
-├── YYYY-MM-DD_filtered.md                   # excluded-item audit file
 └── rising-authors-YYYY-MM-DD.md             # weekly, Sundays only
 ```
 
@@ -135,6 +140,7 @@ Secrets at `~/.config/social-scan/.env`:
 
 - `X_BEARER_TOKEN` (required) — X Basic tier or pay-per-use needed for the List Tweets endpoint
 - `GITHUB_TOKEN` (recommended) — raises GitHub API rate limit from 60/hour to 5000/hour
+- `TELEGRAM_API_ID` / `TELEGRAM_API_HASH` (required for Telegram) — from my.telegram.org
 
 The orchestrator sources this file at startup so all child collectors inherit the values.
 
@@ -145,22 +151,23 @@ Other env vars (sensible defaults if unset):
 - `SCOUT_MANIFEST_DIR` — manifest output dir (default: `/tmp/scout`)
 - `SCOUT_STATE_DIR` — rolling URL/author state (default: `~/.local/share/scout`)
 - `SCOUT_SEEN_WINDOW_DAYS` — URL dedup window (default: 14)
-- Per-collector windows: `REDDIT_HOURS` (24), `SEED_HOURS` (24), `RSS_HOURS` (48), `GITHUB_HOURS` (24), `ARXIV_HOURS` (48)
+- Per-collector windows: `REDDIT_HOURS` (24), `SEED_HOURS` (24), `RSS_HOURS` (48), `GITHUB_HOURS` (24), `ARXIV_HOURS` (48), `TELEGRAM_HOURS` (24)
 
 ## Dependencies
 
 System: bash, jq, curl, python3, node (for the reddit-readonly skill), flock (for cron mutex).
 
-Workspace: `skills/reddit-readonly/` (Reddit API wrapper); `skills/scout-signal-scan/scripts/telegram-scan.sh` (in-skill Telegram collector, optional).
+Workspace: `skills/reddit-readonly/` (Reddit API wrapper).
 
-External: no separate `~/telegram-sync/` repo is required. Telegram collection uses the in-skill Telethon helper and its configured venv/session.
+Telegram: a dedicated venv at `~/.local/share/scout/telegram-venv` with `telethon` and `python-dotenv`, plus an authorized Telethon session at `~/.local/share/scout/telegram.session`. The collector (`telegram-scan.sh` + `lib/telegram_fetch.py`) is fully in-skill; the former external `~/telegram-sync/` repo is no longer used and can be deleted. Setup steps in `skills/scout-signal-scan/references/SETUP.md`.
 
 ## Tokens and tier requirements
 
 - **X API:** Basic tier ($200/month at time of writing, grandfathered) or pay-per-use. Free tier doesn't have access to the List Tweets endpoint. The script makes one API call per run, so volume is trivial regardless of tier.
 - **GitHub API:** unauthenticated 60/hour, authenticated 5000/hour. The orchestrator burns 15-25 calls per run, so unauthenticated breaks down quickly on a busy day.
 - **Reddit:** no token; uses the reddit-readonly skill which scrapes public JSON endpoints.
-- **arxiv, RSS feeds, Telegram:** no tokens, public access.
+- **Telegram:** needs `TELEGRAM_API_ID` / `TELEGRAM_API_HASH` (from my.telegram.org) in `~/.config/social-scan/.env`, plus a one-time authorized Telethon session. No per-request cost.
+- **arxiv, RSS feeds:** no tokens, public access.
 
 ## Manifest contract (current: v1.1)
 
@@ -187,7 +194,7 @@ Full schema in `skills/scout-signal-scan/references/MANIFEST_SCHEMA.md`. Source-
 
 ```bash
 # Manual collection run
-~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh
+sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh
 
 # Inspect today's manifest
 MANIFEST=/tmp/scout/manifest-$(date -u +%F).json
@@ -196,7 +203,7 @@ jq '.items | length' $MANIFEST
 jq '[.items[].source] | unique' $MANIFEST
 
 # Test an individual collector
-~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/x-list-scan.sh 24
+sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/x-list-scan.sh 24
 
 # Check state
 wc -l ~/.local/share/scout/seen-urls.jsonl
@@ -218,5 +225,6 @@ tail /var/log/scout-collect.log
 | x-list-scan returns empty | Check `list_id` in `config/x-list.json` matches the actual List URL; check List has members; check time window isn't too tight |
 | RSS feed returning nothing | `curl -s -w "HTTP %{http_code}, %{size_download} bytes\n" <feed_url>`; URL may have moved |
 | GitHub rate-limited | Check `curl -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/rate_limit`; if low, token isn't being read |
+| Telegram returns empty | Check the `.session` exists at `~/.local/share/scout/telegram.session` and is authorized; check `TELEGRAM_API_ID`/`HASH` in `.env`; check telethon is installed in the venv. Test via the orchestrator, not a direct run (sudo strips the env) |
 | Manifest schema mismatch | Compare `manifest.schema_version` against `MANIFEST_SCHEMA.md`'s declared version |
 | Scout surfacing junk | Likely a filter gap; inspect the surfacing item's metadata and either tighten the threshold or add a negative filter |
