@@ -1,22 +1,44 @@
 # TOOLS.md - Local Notes
 
-## Social Scan
+Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
 
-### Obsidian signal log destination
+## What Goes Here
 
-- `/home/clawdbot/obsidian-vault/Signals/`
+Things like:
 
-### Telegram channels to scan
+- Camera names and locations
+- SSH hosts and aliases
+- Preferred voices for TTS
+- Speaker/room names
+- Device nicknames
+- Anything environment-specific
 
-- `@ERC8004`
-- `@erc8183`
+## Examples
 
-### External dependencies
+```markdown
+### Cameras
 
-- social scan skill source: `/home/clawdbot/social-scan-skill`
-- telegram sync dependency: `/home/clawdbot/telegram-sync`
+- living-room → Main area, 180° wide angle
+- front-door → Entrance, motion-triggered
 
-### Expected auth/config
+### SSH
 
-- X bearer token: `~/.config/social-scan/.env`
-- Telegram sync env: `/home/clawdbot/telegram-sync/.env`
+- home-server → 192.168.1.100, user: admin
+
+### TTS
+
+- Preferred voice: "Nova" (warm, slightly British)
+- Default speaker: Kitchen HomePod
+```
+
+## Why Separate?
+
+Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
+
+---
+
+Add whatever helps you do your job. This is your cheat sheet.
+
+## Related
+
+- [Agent workspace](/concepts/agent-workspace)
