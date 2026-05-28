@@ -1,16 +1,7 @@
 {
   "_comment": "GitHub repos polled by github-scan.sh. Uses public API; for higher rate limits set GITHUB_TOKEN env var.",
   "release_watch": [
-    {"owner": "ethereum", "repo": "EIPs"},
-    {"owner": "eth-infinitism", "repo": "account-abstraction"},
-    {"owner": "erc7579", "repo": "erc7579-implementation"},
-    {"owner": "safe-global", "repo": "safe-smart-account"},
-    {"owner": "pimlico-io", "repo": "permissionless"},
-    {"owner": "alchemyplatform", "repo": "aa-sdk"},
-    {"owner": "zerodevapp", "repo": "kernel"},
-    {"owner": "coinbase", "repo": "x402"},
-    {"owner": "coinbase", "repo": "agentkit"},
-    {"owner": "lightninglabs", "repo": "lnd"}
+    {"owner": "ethereum", "repo": "EIPs"}
   ],
   "eip_repo": {
     "owner": "ethereum",
