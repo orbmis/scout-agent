@@ -18,7 +18,7 @@ The orchestrator resolves paths in this order:
 | Variable | Default | Purpose |
 |---|---|---|
 | `OPENCLAW_WORKSPACE` | auto-detected | Scout workspace root |
-| `SCOUT_SIGNALS_DIR` | `/home/clawdbot/obsidian-vault/Signals` | where daily signal files land |
+| `SCOUT_SIGNALS_DIR` | `~/obsidian-vault/Signals` | where daily signal files land |
 | `SCOUT_MANIFEST_DIR` | `/tmp/scout` | where JSON manifests are written |
 | `SCOUT_STATE_DIR` | `~/.local/share/scout` | URL dedup + tier3 authors |
 | `SCOUT_SEEN_WINDOW_DAYS` | 14 | URL dedup window |
@@ -75,9 +75,61 @@ After this, adding or removing seed authors happens in the X app. The next colle
 
 The Reddit subreddit allowlist is hardcoded in `scripts/reddit-scan.sh` (currently r/ethereum, r/ethdev, r/ethfinance, r/ethstaker, r/MachineLearning, r/LocalLLaMA). To add or remove subs, edit the `ALLOWED_SUBS` array in that script.
 
-## Telegram
+## Telegram (one-time setup)
 
-`log-social-signals.sh` runs the in-skill collector at `skills/scout-signal-scan/scripts/telegram-scan.sh`. If the collector config is missing, the manifest's telegram diagnostic reflects this (`status: "script_missing"`). Missing Telegram credentials, venv, or session produce `status: "script_failed"`.
+The Telegram collector (`telegram-scan.sh`) uses the in-skill `scripts/lib/telegram_fetch.py`, which talks to Telegram directly via Telethon. There is no external dependency — the former `telegram-sync` repo is no longer used.
+
+Setup has three parts: a venv with Telethon, credentials in the env file, and an authorized session file.
+
+**1. Create the venv:**
+
+```bash
+sudo -u clawdbot python3 -m venv ~/.local/share/scout/telegram-venv
+sudo -u clawdbot ~/.local/share/scout/telegram-venv/bin/pip install --upgrade pip
+sudo -u clawdbot ~/.local/share/scout/telegram-venv/bin/pip install telethon python-dotenv
+```
+
+The venv path is set in `config/telegram-channels.json` as `python_bin` (default `~/.local/share/scout/telegram-venv/bin/python`).
+
+**2. Add credentials to the env file:**
+
+```bash
+cat >> ~/.config/social-scan/.env << 'EOF'
+TELEGRAM_API_ID=your_api_id
+TELEGRAM_API_HASH=your_api_hash
+EOF
+```
+
+Obtain `TELEGRAM_API_ID` and `TELEGRAM_API_HASH` from https://my.telegram.org. The orchestrator sources this file at startup, so the collector inherits the credentials.
+
+**3. Authorize a session.** Telethon needs a one-time interactive login that writes a `.session` file. The session path is set in `config/telegram-channels.json` as `session_path` (default `~/.local/share/scout/telegram`, producing `~/.local/share/scout/telegram.session`).
+
+Run the fetcher interactively (not under cron). Source the env first, since a direct run doesn't:
+
+```bash
+set -a; source ~/.config/social-scan/.env; set +a
+~/.local/share/scout/telegram-venv/bin/python \
+  ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/lib/telegram_fetch.py \
+  --group ERC8004 --hours 24 --session ~/.local/share/scout/telegram
+```
+
+It prompts for phone number and login code once, writes the `.session` file, and subsequent runs are non-interactive. The script never prompts under cron: if the session is missing or unauthorized, it exits cleanly with an empty array and a stderr note rather than hanging.
+
+If you are migrating from the old `telegram-sync` setup, you can copy the existing authorized session instead of re-authorizing (a Telethon `.session` is a portable SQLite file):
+
+```bash
+sudo -u clawdbot cp ~/telegram-sync/tg_folk_logger.session \
+                   ~/.local/share/scout/telegram.session
+```
+
+**Channels.** Edit the `channels` array in `config/telegram-channels.json` to change coverage. No script edit needed.
+
+**Testing.** Because the credentials come from the env file and a direct run under `sudo -u clawdbot` strips the environment, the faithful test is via the orchestrator (which sources the env inside the `clawdbot` process):
+
+```bash
+sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh
+jq '.collection_diagnostics.telegram' /tmp/scout/manifest-$(date -u +%F).json
+```
 
 ## Cron setup
 
@@ -86,7 +138,7 @@ Recommended cadence: 08:00 UTC for collection, 08:30 UTC for agent processing.
 ```cron
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-0 8 * * * /usr/bin/flock -n /tmp/scout-collect.lock bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh >> /var/log/scout-collect.log 2>&1
+0 8 * * * /usr/bin/flock -n /tmp/scout-collect.lock bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh >> /var/log/scout-collect.log 2>&1
 ```
 
 The agent processing step depends on your OpenClaw deployment. The simplest pattern is a second cron job at 08:30 UTC that:
@@ -125,7 +177,7 @@ After first run, you should see:
 After installing, run the orchestrator once manually and inspect the manifest:
 
 ```bash
-sudo -u clawdbot bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh
+sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh
 MANIFEST=/tmp/scout/manifest-$(date -u +%F).json
 jq '.schema_version, .window_hours, .collection_diagnostics' $MANIFEST
 jq '.items | length' $MANIFEST
@@ -147,19 +199,19 @@ Each collector runs standalone for debugging:
 
 ```bash
 # X List
-sudo -u clawdbot bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/x-list-scan.sh 24
+sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/x-list-scan.sh 24
 
 # Reddit
-sudo -u clawdbot bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/reddit-scan.sh "" 24
+sudo -u clawdbot bash /~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/reddit-scan.sh "" 24
 
 # RSS
-sudo -u clawdbot bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/rss-scan.sh 48
+sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/rss-scan.sh 48
 
 # GitHub
-sudo -u clawdbot bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/github-scan.sh 24
+sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/github-scan.sh 24
 
 # arxiv
-sudo -u clawdbot bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/arxiv-scan.sh 48
+sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/arxiv-scan.sh 48
 ```
 
 Each emits a JSON array to stdout and a one-line diagnostic to stderr.
@@ -172,6 +224,8 @@ Each emits a JSON array to stdout and a one-line diagnostic to stderr.
 - **RSS scan failure on a specific feed:** that feed's URL has likely changed. Update `config/feeds.json`.
 - **arxiv returns nothing on a weekday:** the keyword filter may be too strict. Loosen filters in `config/arxiv.json` to debug. Zero items on weekends is normal (arxiv's `<skipDays>`).
 - **GitHub returns 403:** rate-limited. Set `GITHUB_TOKEN`.
-- **Telegram diagnostic shows `script_missing`:** restore `config/telegram-channels.json` in the skill.
-- **Lots of `grep: warning: ? at start of expression` in stderr:** a config file contains PCRE-style `(?:...)` non-capturing groups. Find with `grep -rn '(?:' /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/config/`. Replace with `(...)` capturing groups.
+- **Telegram returns empty with "no authorized session":** the `.session` file is missing or invalid at `session_path`. Run the interactive login once (see Telegram setup above) or copy a valid session file into place.
+- **Telegram returns empty with "Missing env vars":** `TELEGRAM_API_ID` / `TELEGRAM_API_HASH` aren't in `~/.config/social-scan/.env`, or you're testing a direct run that didn't source the env. Test via the orchestrator instead.
+- **Telegram returns empty with "telethon not installed":** the venv at `python_bin` lacks Telethon. Re-run the pip install step.
+- **Lots of `grep: warning: ? at start of expression` in stderr:** a config file contains PCRE-style `(?:...)` non-capturing groups. Find with `grep -rn '(?:' ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/config/`. Replace with `(...)` capturing groups.
 - **Cron run times out at 180s while manual runs complete:** check that `~/.config/social-scan/.env` is being sourced. Check cron `PATH` includes `jq`, `python3`, `node`. Run per-collector timing breakdown to identify the bottleneck.
