@@ -29,9 +29,10 @@ When the marker appears, Scout:
 5. Applies topic-level dedup against `previous_signals_files` (last 14 days)
 6. Annotates items that materially extend USER.md's writing focus or hypotheses
 7. Writes the dated signal file using the tiered structure
-8. Appends new Tier 3 authors to `~/.local/share/scout/tier3-authors.jsonl`
-9. If `weekly_report_due`, also writes `rising-authors-{date_utc}.md`
-10. Deletes the marker on completion
+8. Writes a filtered companion file containing all dropped items and the reason each was excluded
+9. Appends new Tier 3 authors to `~/.local/share/scout/tier3-authors.jsonl`
+10. If `weekly_report_due`, also writes `rising-authors-{date_utc}.md`
+11. Deletes the marker on completion
 
 ## Signal Scoring Framework
 
@@ -85,6 +86,8 @@ Scout does not re-apply these.
 
 Scout writes findings to `/home/clawdbot/obsidian-vault/Signals/YYYY-MM-DD.md` using a four-tier structure. AGENTS.md is the canonical tiering policy; `references/MANIFEST_SCHEMA.md` documents the manifest contract and default mapping.
 
+Scout also writes `/home/clawdbot/obsidian-vault/Signals/YYYY-MM-DD_filtered.md` on every run. This is an audit file for excluded candidates so filtering decisions can be reviewed and tuned without weakening the main signal log.
+
 **Tier 0 — Primary Source.** RSS from research_outputs/core_protocol/forums/company_blogs groups; all GitHub and arxiv; RSS newsletters (lower content-specificity weight). Read first.
 
 **Tier 1 — Seed-Set Signal.** `author.is_seed_author: true`. Primarily `source: x-seed`. "What the people I trust are saying today."
@@ -96,6 +99,19 @@ Scout writes findings to `/home/clawdbot/obsidian-vault/Signals/YYYY-MM-DD.md` u
 ### Entry format
 
 Each entry: source platform and tier; author handle, account age in days, prior engagement context if relevant; title or label; link; engagement context (which seed authors engaged, if any; total engagement only if notable); short summary in Scout's own words; why it may matter against tracked themes; composite score (weak / moderate / strong) and dominant axis; captured timestamp.
+
+### Filtered file format
+
+The filtered companion file must include every manifest item that does not land in the main daily signal file, including:
+
+- items dropped for failing the composite threshold
+- items dropped by the threshold gate because they lacked any required anchor signal
+- items dropped during topic-level dedup because a recent file already covered the development without materially new information
+- items collapsed into another kept entry, with the retained canonical item identified
+
+For each excluded item, record: source platform; author handle; title or label; link; captured timestamp; the exclusion class (`below_threshold`, `missing_anchor_signal`, `topic_dedup`, or `collapsed_to_cluster`); a short reason in Scout's own words; and any concise scoring note that explains the dominant weakness or why the kept duplicate was stronger.
+
+The filtered file is for auditability, not promotion. Keep it structured and terse.
 
 ### Topic-level dedup
 
@@ -132,6 +148,7 @@ Scout must always:
 - Use `previous_signals_files` for topic-level dedup
 - Capture source links from the manifest as canonical URLs
 - Distinguish Tier 0 primary sources from Tier 1 seed commentary from Tier 2/3 ambient signal
+- Write the filtered companion file on every run, including explicit exclusion reasons
 - Apply Connects-to annotations conservatively
 - Append new Tier 3 authors to the rising-authors state file
 - Delete the marker on successful completion
@@ -164,6 +181,13 @@ Daily signal file order:
 
 Then collection diagnostics at the bottom.
 
+Filtered companion file order:
+
+1. Below threshold
+2. Missing required anchor signal
+3. Topic dedup / collapsed items
+4. Filter diagnostics summary
+
 ## File System Discipline
 
-Workspace-relative paths unless absolute external paths required. External paths: Obsidian signals folder `/home/clawdbot/obsidian-vault/Signals/`; daily signal file `YYYY-MM-DD.md`; weekly rising authors `rising-authors-YYYY-MM-DD.md` (both in the signals folder).
+Workspace-relative paths unless absolute external paths required. External paths: Obsidian signals folder `/home/clawdbot/obsidian-vault/Signals/`; daily signal file `YYYY-MM-DD.md`; filtered companion file `YYYY-MM-DD_filtered.md`; weekly rising authors `rising-authors-YYYY-MM-DD.md` (all in the signals folder).

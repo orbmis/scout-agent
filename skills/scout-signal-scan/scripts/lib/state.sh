@@ -69,3 +69,47 @@ state_filter_new_items() {
   done
   echo "$kept"
 }
+
+state_filter_new_items_no_mark() {
+  # Reads JSON array from stdin, writes array containing only items whose .url is not in seen-urls.
+  # Does not mutate the seen state; callers can commit after successful downstream writes.
+  state_init
+  state_prune_seen_urls
+
+  local input
+  input=$(cat)
+  local count
+  count=$(echo "$input" | jq 'length')
+  local kept="[]"
+  for ((i=0; i<count; i++)); do
+    local item url
+    item=$(echo "$input" | jq -c ".[$i]")
+    url=$(echo "$item" | jq -r '.url // empty')
+    if [[ -z "$url" ]]; then
+      kept=$(echo "$kept" | jq --argjson it "$item" '. + [$it]')
+      continue
+    fi
+    if state_seen_url "$url"; then
+      continue
+    fi
+    kept=$(echo "$kept" | jq --argjson it "$item" '. + [$it]')
+  done
+  echo "$kept"
+}
+
+state_mark_urls_from_items() {
+  # Reads JSON array from stdin and records each non-empty .url as seen.
+  state_init
+
+  local input
+  input=$(cat)
+  local count
+  count=$(echo "$input" | jq 'length')
+  for ((i=0; i<count; i++)); do
+    local url
+    url=$(echo "$input" | jq -r ".[$i].url // empty")
+    if [[ -n "$url" ]]; then
+      state_mark_url_seen "$url"
+    fi
+  done
+}

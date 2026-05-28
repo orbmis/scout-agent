@@ -41,15 +41,22 @@ Your steps:
    output format defined in AGENTS.md. Include the collection_diagnostics from
    the manifest in any empty-tier handling.
 
-8. Append unknown authors that cleared the scoring threshold and landed in
+8. Also write {signals_dir}/{date_utc}_filtered.md containing every manifest
+   item that did not land in the main daily signal file. For each excluded item,
+   include the source platform, author handle, title or label, canonical link,
+   captured timestamp, exclusion class, and a brief reason in Scout's own
+   words. Include items excluded for low score, missing anchor signal,
+   topic-level dedup, or collapse into another retained cluster.
+
+9. Append unknown authors that cleared the scoring threshold and landed in
    Tier 3 to ~/.local/share/scout/tier3-authors.jsonl. Schema:
    {"date": "...", "handle": "...", "url": "...", "score_axis": "...", "subsource": "..."}.
 
-9. If weekly_report_due is true, also produce
+10. If weekly_report_due is true, also produce
    {signals_dir}/rising-authors-{date_utc}.md per the Weekly Rising Authors
    Report section of AGENTS.md.
 
-10. Delete the marker file /tmp/scout/ready-{DATE}.marker on completion to
+11. Delete the marker file /tmp/scout/ready-{DATE}.marker on completion to
     prevent reprocessing.
 
 Today's date: {DATE}
@@ -60,5 +67,5 @@ Manifest: /tmp/scout/manifest-{DATE}.json
 
 - The agent reads the same SOUL.md / AGENTS.md / USER.md it normally uses. The instruction above is the *task*, not the configuration.
 - The instruction is deliberately terse on rules — AGENTS.md is where the rules live. If the agent doesn't have AGENTS.md loaded into its session, this will not work.
-- Marker deletion at step 10 makes the trigger idempotent. If the agent fails mid-run, the marker remains and the next trigger will reprocess.
+- Marker deletion at step 11 makes the trigger idempotent. If the agent fails mid-run, the marker remains and the next trigger will reprocess.
 - For OpenClaw setups using a scheduled session: have the scheduler check for the marker file at every cycle (e.g. every 15 minutes) and invoke Scout with the template above only when one is present.

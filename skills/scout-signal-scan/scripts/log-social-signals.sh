@@ -27,6 +27,7 @@ DATE_UTC=$(date -u +%F)
 CAPTURED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 MANIFEST_FILE="$MANIFEST_DIR/manifest-$DATE_UTC.json"
 MARKER_FILE="$MANIFEST_DIR/ready-$DATE_UTC.marker"
+MANIFEST_MD_FILE="$SIGNALS_DIR/manifest-$DATE_UTC.md"
 
 # Default window sizes
 REDDIT_HOURS="${REDDIT_HOURS:-24}"
@@ -92,8 +93,8 @@ fi
 # Merge all collector outputs
 MERGED=$(jq -s 'add' "$TMP/reddit.json" "$TMP/seed.json" "$TMP/rss.json" "$TMP/github.json" "$TMP/arxiv.json" "$TELEGRAM_JSON")
 
-# Apply state-based URL dedup
-NEW_ITEMS=$(echo "$MERGED" | state_filter_new_items)
+# Apply state-based URL dedup without mutating state until the manifest is safely written
+NEW_ITEMS=$(echo "$MERGED" | state_filter_new_items_no_mark)
 
 # Build collection diagnostics
 REDDIT_COUNT=$(jq 'length' "$TMP/reddit.json")
@@ -125,13 +126,16 @@ DIAGNOSTICS=$(jq -nc \
 
 # Build the manifest
 PREV_FILES=$(find "$SIGNALS_DIR" -name "????-??-??.md" -type f -mtime -14 2>/dev/null | sort | jq -R . | jq -sc .)
+printf '%s\n' "$NEW_ITEMS" > "$TMP/new-items.json"
+printf '%s\n' "$DIAGNOSTICS" > "$TMP/diagnostics.json"
+printf '%s\n' "$PREV_FILES" > "$TMP/prev-files.json"
 
 # Day-of-week for weekly report flag (1=Mon..7=Sun)
 DOW=$(date -u +%u)
 WEEKLY_FLAG="false"
 if [[ "$DOW" == "7" ]]; then WEEKLY_FLAG="true"; fi
 
-jq -nc \
+jq -n \
   --arg captured_at "$CAPTURED_AT" \
   --arg date_utc "$DATE_UTC" \
   --argjson reddit_hours "$REDDIT_HOURS" \
@@ -139,11 +143,11 @@ jq -nc \
   --argjson rss_hours "$RSS_HOURS" \
   --argjson github_hours "$GITHUB_HOURS" \
   --argjson arxiv_hours "$ARXIV_HOURS" \
-  --argjson new_items "$NEW_ITEMS" \
-  --argjson diagnostics "$DIAGNOSTICS" \
-  --argjson prev_files "$PREV_FILES" \
   --argjson weekly_report_due "$WEEKLY_FLAG" \
   --arg signals_dir "$SIGNALS_DIR" \
+  --slurpfile new_items "$TMP/new-items.json" \
+  --slurpfile diagnostics "$TMP/diagnostics.json" \
+  --slurpfile prev_files "$TMP/prev-files.json" \
   '{
     schema_version: "1.1",
     captured_at: $captured_at,
@@ -156,15 +160,25 @@ jq -nc \
       arxiv:  $arxiv_hours
     },
     signals_dir: $signals_dir,
-    previous_signals_files: $prev_files,
+    previous_signals_files: $prev_files[0],
     weekly_report_due: $weekly_report_due,
-    collection_diagnostics: $diagnostics,
-    items: $new_items
+    collection_diagnostics: $diagnostics[0],
+    items: $new_items[0]
   }' > "$MANIFEST_FILE"
+
+{
+  printf '# Manifest - %s\n\n' "$DATE_UTC"
+  printf '```json\n'
+  jq '.' "$MANIFEST_FILE"
+  printf '\n```\n'
+} > "$MANIFEST_MD_FILE"
+
+echo "$NEW_ITEMS" | state_mark_urls_from_items
 
 touch "$MARKER_FILE"
 
 echo "[orchestrator] manifest written: $MANIFEST_FILE" >&2
+echo "[orchestrator] markdown copy written: $MANIFEST_MD_FILE" >&2
 echo "[orchestrator] items: $TOTAL_AFTER_DEDUP (of $TOTAL_BEFORE_DEDUP before dedup)" >&2
 echo "[orchestrator] weekly_report_due: $WEEKLY_FLAG" >&2
 echo "$MANIFEST_FILE"

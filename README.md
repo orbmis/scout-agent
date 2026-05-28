@@ -23,7 +23,7 @@ Two halves, decoupled by a JSON manifest:
 
 1. **Collection (scout-signal-scan skill).** Runs on cron at 08:00 UTC. Polls six channels (allowlisted Reddit subs, X List of seed authors, RSS feeds, GitHub releases and EIP commits, arxiv categories, Telegram). Applies hard negative filters at collection time. Enriches each item with metadata flags (EIP references, anchor-domain links, tracked companies, protocols, technical markers). Dedups against a rolling 14-day URL store. Writes a JSON manifest at `/tmp/scout/manifest-YYYY-MM-DD.json` and creates a marker file `/tmp/scout/ready-YYYY-MM-DD.marker`.
 
-2. **Agent processing (Scout itself).** Triggered by the marker file. Reads the manifest. Applies a four-axis scoring framework (content specificity, author shape, network engagement, negative markers). Assigns each surviving item to Tier 0 (primary source), Tier 1 (seed-author), Tier 2 (seed-engaged), or Tier 3 (independent). Applies topic-level dedup against the previous 14 days of signal files. Annotates items that materially connect to Simon's active writing focus per USER.md. Writes the daily file. Appends new Tier 3 authors to the rising-authors state. On Sundays, also writes the weekly rising-authors report. Deletes the marker file on success.
+2. **Agent processing (Scout itself).** Triggered by the marker file. Reads the manifest. Applies a four-axis scoring framework (content specificity, author shape, network engagement, negative markers). Assigns each surviving item to Tier 0 (primary source), Tier 1 (seed-author), Tier 2 (seed-engaged), or Tier 3 (independent). Applies topic-level dedup against the previous 14 days of signal files. Annotates items that materially connect to Simon's active writing focus per USER.md. Writes the daily file plus a `YYYY-MM-DD_filtered.md` audit file for excluded items. Appends new Tier 3 authors to the rising-authors state. On Sundays, also writes the weekly rising-authors report. Deletes the marker file on success.
 
 The skill is mechanical; the agent is editorial. Neither does the other's job.
 
@@ -88,6 +88,7 @@ External paths Scout reads from or writes to:
 
 /home/clawdbot/obsidian-vault/Signals/       # agent output
 ├── YYYY-MM-DD.md                            # daily signal file
+├── YYYY-MM-DD_filtered.md                   # excluded-item audit file
 └── rising-authors-YYYY-MM-DD.md             # weekly, Sundays only
 ```
 
