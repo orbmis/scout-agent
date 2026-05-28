@@ -86,7 +86,7 @@ External paths Scout reads from or writes to:
 ~/.config/social-scan/                       # secrets
 └── .env                                     # X_BEARER_TOKEN, GITHUB_TOKEN
 
-/home/clawdbot/obsidian-vault/Signals/       # agent output
+~/obsidian-vault/Signals/       # agent output
 ├── YYYY-MM-DD.md                            # daily signal file
 ├── YYYY-MM-DD_filtered.md                   # excluded-item audit file
 └── rising-authors-YYYY-MM-DD.md             # weekly, Sundays only
@@ -124,9 +124,10 @@ The JSON files in `config/` are read by the skill scripts at runtime and serve a
 
 ```cron
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOME=/path/to/home/folder
 
 # Collection: 08:00 UTC daily
-0 8 * * * /usr/bin/flock -n /tmp/scout-collect.lock bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh >> /var/log/scout-collect.log 2>&1
+0 8 * * * /usr/bin/flock -n /tmp/scout-collect.lock bash $HOME/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh >> /var/log/scout-collect.log 2>&1
 ```
 
 A second mechanism (cron, OpenClaw scheduler, or a watch loop) checks for the marker file periodically and invokes Scout with the prompt from `AGENT_PROMPT.md` when one is present.
@@ -143,7 +144,7 @@ The orchestrator sources this file at startup so all child collectors inherit th
 Other env vars (sensible defaults if unset):
 
 - `OPENCLAW_WORKSPACE` — autodetected if standard
-- `SCOUT_SIGNALS_DIR` — Obsidian Signals folder (default: `/home/clawdbot/obsidian-vault/Signals`)
+- `SCOUT_SIGNALS_DIR` — Obsidian Signals folder (default: `~/obsidian-vault/Signals`)
 - `SCOUT_MANIFEST_DIR` — manifest output dir (default: `/tmp/scout`)
 - `SCOUT_STATE_DIR` — rolling URL/author state (default: `~/.local/share/scout`)
 - `SCOUT_SEEN_WINDOW_DAYS` — URL dedup window (default: 14)
@@ -155,7 +156,7 @@ System: bash, jq, curl, python3, node (for the reddit-readonly skill), flock (fo
 
 Workspace: `skills/reddit-readonly/` (Reddit API wrapper); `scripts/telegram-group-scan.sh` (legacy Telegram collector, optional).
 
-External: `/home/clawdbot/telegram-sync/` is the dependency for telegram-group-scan.sh; not required for the rest of the pipeline.
+External: `~/telegram-sync/` is the dependency for telegram-group-scan.sh; not required for the rest of the pipeline.
 
 ## Tokens and tier requirements
 
@@ -174,21 +175,6 @@ Each item has `source`, `subsource`, `url`, `title`, `text`, `author` (with seed
 
 Full schema in `skills/scout-signal-scan/references/MANIFEST_SCHEMA.md`. Source-to-tier mapping is documented there.
 
-## What changed in the rebuild
-
-The workspace was rebuilt during a session in May 2026. Major changes from the prior `social-scan-skill` setup:
-
-- **Skill renamed and re-architected.** `social-scan-skill` (also called `social-scan-bd`) is retired; the new skill is `scout-signal-scan`
-- **Collection split from scoring.** The old skill produced human-readable output directly. The new skill produces a JSON manifest; the agent does the editorial work
-- **Four new collectors.** rss-scan, github-scan, arxiv-scan, and x-list-scan now sit alongside the Reddit collector
-- **X keyword search retired.** The old broad X keyword search produced noisy discovery; X coverage is now entirely via the List
-- **X List replaces per-handle scanning.** The interim x-seed-scan approach (iterating `seed-authors.json` with ~60 API calls per run) was replaced by reading a public X List with a single API call. Seed curation moves from JSON-on-server to X-UI-on-phone
-- **Reddit narrowed to allowlist.** No more site-wide Reddit search; only a small set of substantive subs (r/ethereum, r/ethdev, r/ethfinance, r/ethstaker, r/MachineLearning, r/LocalLLaMA)
-- **Tier 0 introduced.** Four tiers now, with primary sources (RSS research, GitHub, arxiv, company blogs) as Tier 0 above the seed-author Tier 1
-- **State files.** Rolling URL dedup at `~/.local/share/scout/seen-urls.jsonl`, agent-managed rising-authors state at `tier3-authors.jsonl`
-- **Connects-to annotations.** Items that materially extend Simon's writing focus or active hypotheses get a single annotation line per USER.md
-- **URL expansion on X.** x-list-scan uses `entities.urls.expanded_url` so anchor-domain detection works on tweets that share external links
-
 ## Operational gotchas worth remembering
 
 - **arxiv on weekends.** arxiv doesn't publish Sat/Sun (declared in `<skipDays>` in the feed). Zero items kept from arxiv on those days is expected, not a failure
@@ -204,7 +190,7 @@ The workspace was rebuilt during a session in May 2026. Major changes from the p
 
 ```bash
 # Manual collection run
-sudo -u clawdbot bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh
+~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh
 
 # Inspect today's manifest
 MANIFEST=/tmp/scout/manifest-$(date -u +%F).json
@@ -213,7 +199,7 @@ jq '.items | length' $MANIFEST
 jq '[.items[].source] | unique' $MANIFEST
 
 # Test an individual collector
-sudo -u clawdbot bash /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/x-list-scan.sh 24
+~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/x-list-scan.sh 24
 
 # Check state
 wc -l ~/.local/share/scout/seen-urls.jsonl
@@ -222,18 +208,6 @@ tail ~/.local/share/scout/tier3-authors.jsonl
 # Check cron health
 tail /var/log/scout-collect.log
 ```
-
-## Pending changes / maintenance backlog
-
-Things flagged during the rebuild that haven't been actioned yet:
-
-- **EIP regex broadening.** `eip_pattern` should be widened from the fixed allowlist to `\b(?:ERC|EIP)-?([0-9]{3,5})\b` so all EIPs populate `eip_numbers`, with the agent doing the tracked-EIP intersection check. The change affects all collectors, not just github-scan; verify across the full pipeline before committing. Slated for review on Thursday.
-- **Handle resolution diagnostic.** The retired `x-seed-scan.sh` reported "processed 28/30 handles" without saying which 2 failed. No longer relevant for x-list-scan (single API call), but if you ever revive per-handle scanning, add a one-line stderr message for unresolved handles.
-- **`seed-authors.json` currency.** All items in current List runs are `seed_category: "uncategorised"` because the List membership doesn't match the categorised handles. Decide whether to (a) backfill the file with categories for current List members, (b) retire the file entirely, or (c) accept the uncategorised default. Option (a) preserves editorial categorisation; (c) is no-op.
-- **Lingering `(?:` patterns.** As of last test, grep warnings still fire from somewhere despite `negative-filters.json` being updated. Run `grep -rn '(?:' /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/config/` to find the remaining offender.
-- **Telegram diagnostic improvement.** The current telegram block reports `script_missing`, `no_activity`, `script_failed`, or `ok` with item counts. It doesn't distinguish channels-with-activity-but-no-matching-content from channels-with-no-activity. Low priority but worth refining if Telegram becomes more important.
-- **Orchestrator state-filter performance.** `state_filter_new_items` makes sequential jq calls per item. Fine at current ~80 items per run; would drag at 500+. Optimisation not urgent.
-- **`tracked-entities.json` company list.** Hasn't been reviewed for currency since the original session. Companies move quickly in this space; some entries may be defunct or have changed names.
 
 ## Where to look when something is broken
 
