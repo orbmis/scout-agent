@@ -29,13 +29,6 @@ bash scripts/github-scan.sh <hours>             # releases + EIP commits
 bash scripts/arxiv-scan.sh <hours>              # arxiv categories with keyword filter
 ```
 
-### Retired collectors
-
-- `social-scan-portable.sh` (mixed Reddit + X keyword search) — retired. The X keyword half duplicated seed-author coverage for accounts of interest and produced noisy discovery for unknown accounts. The Reddit half was replaced by `reddit-scan.sh`, scoped to a small allowlist of substantive subreddits.
-- `x-seed-scan.sh` (per-handle X timeline scanning) — retired. The per-handle approach required keeping `seed-authors.json` in sync with editorial intent and made ~60 API calls per run. Replaced by `x-list-scan.sh`, which reads a single X List with one API call. Seed curation now happens in the X UI rather than in JSON.
-
-The retired scripts are kept on disk with a `.retired` suffix for rollback purposes.
-
 ## Configuration
 
 All source lists and filters live in `config/`. These are the runtime source of truth for the scripts. AGENTS.md documents the same lists at a category level for the agent's editorial context; keep the two in sync.
@@ -43,7 +36,7 @@ All source lists and filters live in `config/`. These are the runtime source of 
 - `config/negative-filters.json` — subreddit blocklist, regex patterns, account shape rules. Patterns use POSIX extended regex syntax (no `(?:...)` non-capturing groups; use `(...)` instead)
 - `config/tracked-entities.json` — EIPs, protocols, companies, technical markers, anchor domains
 - `config/x-list.json` — X List ID and metadata. The List itself, edited in the X app, is the runtime source of truth for who Scout watches on X
-- `config/seed-authors.json` — editorial reference mapping X handles to categories (aa_standards, agent_payments, etc.). No longer determines who gets scanned (the List does that); used by x-list-scan to enrich items with `seed_category`. Handles in the List but not here get `seed_category: "uncategorised"`
+- `config/seed-authors.json` — editorial reference mapping X handles to categories (aa_standards, agent_payments, etc.). Used by x-list-scan to enrich items with `seed_category`. Handles in the List but not here get `seed_category: "uncategorised"`
 - `config/feeds.json` — RSS feeds with per-source caps and category filters
 - `config/github-repos.json` — repos for release watch and EIP file watch
 - `config/arxiv.json` — categories and keyword filter
@@ -53,8 +46,6 @@ The Reddit allowlist is embedded in `scripts/reddit-scan.sh` rather than a confi
 ## Manifest format
 
 See `references/MANIFEST_SCHEMA.md`. Current schema version: **1.1**. Every field is a factual observation; the skill never emits scores, tier assignments, or interpretations. Those are the agent's job.
-
-X items still carry `source: "x-seed"` even though they now come from the List rather than per-handle scanning. The semantic ("this came from a seed-set author") is unchanged; only the mechanism behind it changed. This avoids a manifest schema break.
 
 ## Environment
 
@@ -66,7 +57,7 @@ The orchestrator sources `~/.config/social-scan/.env` at startup, so all child c
 Other variables (with sensible defaults):
 
 - `OPENCLAW_WORKSPACE` — Scout workspace path (auto-detected if standard)
-- `SCOUT_SIGNALS_DIR` — Obsidian Signals folder (default: `/home/clawdbot/obsidian-vault/Signals`)
+- `SCOUT_SIGNALS_DIR` — Obsidian Signals folder (default: `~/obsidian-vault/Signals`)
 - `SCOUT_MANIFEST_DIR` — manifest output dir (default: `/tmp/scout`)
 - `SCOUT_STATE_DIR` — rolling URL/author state (default: `~/.local/share/scout`)
 - `SCOUT_SEEN_WINDOW_DAYS` — URL dedup window (default: 14)
