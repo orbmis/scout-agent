@@ -36,9 +36,6 @@ workspace-saorin-scout/
 ├── AGENTS.md                                # operational rules (read by agent)
 ├── USER.md                                  # writing focus + hypotheses (read by agent)
 │
-├── scripts/
-│   └── telegram-group-scan.sh               # legacy Telegram collector (called by orchestrator)
-│
 └── skills/
     ├── reddit-readonly/                     # Reddit API wrapper used by reddit-scan.sh
     │   └── scripts/
@@ -154,9 +151,9 @@ Other env vars (sensible defaults if unset):
 
 System: bash, jq, curl, python3, node (for the reddit-readonly skill), flock (for cron mutex).
 
-Workspace: `skills/reddit-readonly/` (Reddit API wrapper); `scripts/telegram-group-scan.sh` (legacy Telegram collector, optional).
+Workspace: `skills/reddit-readonly/` (Reddit API wrapper); `skills/scout-signal-scan/scripts/telegram-scan.sh` (in-skill Telegram collector, optional).
 
-External: `~/telegram-sync/` is the dependency for telegram-group-scan.sh; not required for the rest of the pipeline.
+External: no separate `~/telegram-sync/` repo is required. Telegram collection uses the in-skill Telethon helper and its configured venv/session.
 
 ## Tokens and tier requirements
 

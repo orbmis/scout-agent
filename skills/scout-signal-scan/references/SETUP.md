@@ -77,7 +77,7 @@ The Reddit subreddit allowlist is hardcoded in `scripts/reddit-scan.sh` (current
 
 ## Telegram
 
-`log-social-signals.sh` looks for `$OPENCLAW_WORKSPACE/scripts/telegram-group-scan.sh` and runs it if executable. If absent, the manifest's telegram diagnostic reflects this (`status: "script_missing"`).
+`log-social-signals.sh` runs the in-skill collector at `skills/scout-signal-scan/scripts/telegram-scan.sh`. If the collector config is missing, the manifest's telegram diagnostic reflects this (`status: "script_missing"`). Missing Telegram credentials, venv, or session produce `status: "script_failed"`.
 
 ## Cron setup
 
@@ -172,6 +172,6 @@ Each emits a JSON array to stdout and a one-line diagnostic to stderr.
 - **RSS scan failure on a specific feed:** that feed's URL has likely changed. Update `config/feeds.json`.
 - **arxiv returns nothing on a weekday:** the keyword filter may be too strict. Loosen filters in `config/arxiv.json` to debug. Zero items on weekends is normal (arxiv's `<skipDays>`).
 - **GitHub returns 403:** rate-limited. Set `GITHUB_TOKEN`.
-- **Telegram diagnostic shows `script_missing`:** install or symlink `telegram-group-scan.sh` into the workspace.
+- **Telegram diagnostic shows `script_missing`:** restore `config/telegram-channels.json` in the skill.
 - **Lots of `grep: warning: ? at start of expression` in stderr:** a config file contains PCRE-style `(?:...)` non-capturing groups. Find with `grep -rn '(?:' /home/clawdbot/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/config/`. Replace with `(...)` capturing groups.
 - **Cron run times out at 180s while manual runs complete:** check that `~/.config/social-scan/.env` is being sourced. Check cron `PATH` includes `jq`, `python3`, `node`. Run per-collector timing breakdown to identify the bottleneck.

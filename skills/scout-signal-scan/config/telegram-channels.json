@@ -1,0 +1,10 @@
+{
+  "_comment": "Channels polled by telegram-scan.sh via the in-skill telegram_fetch.py (Telethon). No longer depends on the external telegram-sync repo. Requires: a venv with telethon installed (python_bin), Telegram credentials in ~/.config/social-scan/.env (TELEGRAM_API_ID, TELEGRAM_API_HASH), and an authorized Telethon session at session_path. See references/SETUP.md for one-time setup. Edit the channels list to change coverage.",
+  "python_bin": "~/.local/share/scout/telegram-venv/bin/python",
+  "session_path": "~/.local/share/scout/telegram",
+  "channels": [
+    {"group": "ERC8004", "note": "ERC-8004 discussion"},
+    {"group": "erc8183", "note": "ERC-8183 discussion"}
+  ],
+  "max_items_per_run": 25
+}

@@ -69,25 +69,45 @@ run_collector "rss-scan"    "$TMP/rss.json"    bash "$SCRIPT_DIR/rss-scan.sh" "$
 run_collector "github-scan" "$TMP/github.json" bash "$SCRIPT_DIR/github-scan.sh" "$GITHUB_HOURS"
 run_collector "arxiv-scan"  "$TMP/arxiv.json"  bash "$SCRIPT_DIR/arxiv-scan.sh" "$ARXIV_HOURS"
 
-# Telegram (legacy path — kept for backward compatibility)
-TELEGRAM_SCRIPT="$WORKSPACE/scripts/telegram-group-scan.sh"
-TELEGRAM_RAW="$TMP/telegram.txt"
+# Telegram collector now lives in-skill. Keep diagnostics explicit so the agent
+# can distinguish missing setup from ordinary no-activity runs.
+TELEGRAM_SCRIPT="$SCRIPT_DIR/telegram-scan.sh"
 TELEGRAM_JSON="$TMP/telegram.json"
+TELEGRAM_ERR="$TMP/telegram-scan.err"
 echo "[]" > "$TELEGRAM_JSON"
 TELEGRAM_DIAG='{"channels_scanned":0,"channels_with_activity":0,"items_kept":0,"status":"script_missing"}'
 if [[ -x "$TELEGRAM_SCRIPT" ]]; then
-  if "$TELEGRAM_SCRIPT" 4 > "$TELEGRAM_RAW" 2>/dev/null; then
-    if [[ -s "$TELEGRAM_RAW" ]]; then
-      jq -nR --slurpfile lines <(grep -E '^- ' "$TELEGRAM_RAW" || true) \
-        '[ $lines[0][] | select(. != "") | { source: "telegram", subsource: "telegram-group", url: "", title: ., text: ., author: {handle: "telegram"}, engagement: {}, created_at: "", metadata: { has_eip_reference: false, eip_numbers: [], has_code_block: false, anchor_domain_links: [], tracked_companies: [], tracked_protocols: [], technical_markers: [] } } ]' \
-        > "$TELEGRAM_JSON" 2>/dev/null || echo "[]" > "$TELEGRAM_JSON"
-      TELEGRAM_DIAG='{"channels_scanned":-1,"channels_with_activity":-1,"items_kept":'"$(jq 'length' "$TELEGRAM_JSON")"',"status":"ok"}'
+  if "$TELEGRAM_SCRIPT" 4 > "$TELEGRAM_JSON" 2>"$TELEGRAM_ERR"; then
+    if ! jq -e 'type == "array"' "$TELEGRAM_JSON" >/dev/null 2>&1; then
+      echo "[orchestrator] telegram-scan produced invalid JSON; coercing to empty" >&2
+      echo "[]" > "$TELEGRAM_JSON"
+    fi
+
+    TELEGRAM_COUNT=$(jq 'length' "$TELEGRAM_JSON")
+    TELEGRAM_SUMMARY=$(grep -E '^\[telegram-scan\] channels=' "$TELEGRAM_ERR" | tail -n 1 || true)
+
+    if [[ -n "$TELEGRAM_SUMMARY" ]]; then
+      TELEGRAM_CHANNELS=$(echo "$TELEGRAM_SUMMARY" | sed -E 's/.*channels=([0-9]+).*/\1/')
+      TELEGRAM_ACTIVE=$(echo "$TELEGRAM_SUMMARY" | sed -E 's/.*channels_with_activity=([0-9]+).*/\1/')
+      TELEGRAM_STATUS="ok"
+      if [[ "$TELEGRAM_COUNT" -eq 0 ]]; then
+        TELEGRAM_STATUS="no_activity"
+      fi
+      TELEGRAM_DIAG=$(jq -nc \
+        --argjson scanned "$TELEGRAM_CHANNELS" \
+        --argjson active "$TELEGRAM_ACTIVE" \
+        --argjson kept "$TELEGRAM_COUNT" \
+        --arg status "$TELEGRAM_STATUS" \
+        '{channels_scanned: $scanned, channels_with_activity: $active, items_kept: $kept, status: $status}')
+    elif grep -q 'missing config' "$TELEGRAM_ERR"; then
+      TELEGRAM_DIAG='{"channels_scanned":0,"channels_with_activity":0,"items_kept":0,"status":"script_missing"}'
     else
-      TELEGRAM_DIAG='{"channels_scanned":-1,"channels_with_activity":0,"items_kept":0,"status":"no_activity"}'
+      TELEGRAM_DIAG='{"channels_scanned":0,"channels_with_activity":0,"items_kept":0,"status":"script_failed"}'
     fi
   else
-    TELEGRAM_DIAG='{"channels_scanned":-1,"channels_with_activity":-1,"items_kept":0,"status":"script_failed"}'
+    TELEGRAM_DIAG='{"channels_scanned":0,"channels_with_activity":0,"items_kept":0,"status":"script_failed"}'
   fi
+  cat "$TELEGRAM_ERR" >&2 || true
 fi
 
 # Merge all collector outputs

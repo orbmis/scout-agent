@@ -77,7 +77,7 @@ scout-signal-scan/
 | rss-scan | feeds.json | 48h | 27 feeds across research outputs, newsletters, company blogs, forums, core protocol |
 | github-scan | github-repos.json | 24h | Releases across tracked repos + commits to ethereum/EIPs |
 | arxiv-scan | arxiv.json | 48h | cs.CR, cs.DC, cs.MA, cs.GT with keyword filter. Silent on weekends (arxiv's `<skipDays>`) |
-| telegram | legacy script in workspace | 4h | Optional; runs only if `$WORKSPACE/scripts/telegram-group-scan.sh` is executable |
+| telegram | `scripts/telegram-scan.sh` + `config/telegram-channels.json` | 4h | Optional; uses the in-skill Telethon helper and configured venv/session |
 
 ## What changed in the current iteration
 
