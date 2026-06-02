@@ -3,7 +3,7 @@
   "research_outputs": [
     {"name": "Flashbots MEV Newsletter", "url": "https://collective.flashbots.net/tag/the-mev-letter.rss", "max_items_per_run": 50},
     {"name": "Paradigm Research", "url": "https://www.paradigm.xyz/feed.xml", "max_items_per_run": 10},
-    {"name": "a16z crypto", "url": "https://a16zcrypto.com/feed/", "max_items_per_run": 10},
+    {"name": "a16z crypto", "url": "https://feeds.simplecast.com/XPOpH7r4", "max_items_per_run": 10},
     {"name": "Galaxy Research", "url": "https://www.galaxy.com/research/feed", "max_items_per_run": 10}
   ],
   "newsletters": [
