@@ -14,11 +14,10 @@
     {"name": "Vitalik Blog", "url": "https://vitalik.eth.limo/feed.xml", "max_items_per_run": 10}
   ],
   "company_blogs": [
-    {"name": "Coinbase Developer", "url": "https://www.coinbase.com/developer-platform/discover/rss", "max_items_per_run": 5},
     {"name": "Stripe", "url": "https://stripe.com/blog/feed.rss", "max_items_per_run": 5}
   ],
   "forums": [
-    {"name": "ethresear.ch - Account Abstraction", "url": "https://ethresear.ch/c/account-abstraction/45.rss", "max_items_per_run": 15},
+    {"name": "ethresear.ch - Account Abstraction", "url": "https://ethresear.ch/tag/account-abstraction.rss", "max_items_per_run": 15},
     {"name": "Ethereum Magicians", "url": "https://ethereum-magicians.org/latest.rss", "max_items_per_run": 20}
   ]
 }
