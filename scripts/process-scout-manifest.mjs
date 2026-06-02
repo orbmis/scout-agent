@@ -281,6 +281,7 @@ function scoreItem(item) {
     !!metadata.has_eip_reference,
     (metadata.tracked_protocols || []).length > 0,
     (metadata.tracked_companies || []).length > 0,
+    (metadata.technical_markers || []).length > 0,
     !!metadata.has_code_block,
   ].filter(Boolean).length;
   const hasRequiredAnchorSignal =
