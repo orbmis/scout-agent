@@ -9,8 +9,6 @@ sudo apt-get update
 sudo apt-get install -y bash jq curl coreutils python3
 ```
 
-Node is required only if you still use the legacy `reddit-readonly` skill, which is what `reddit-scan.sh` calls.
-
 ## Workspace and Obsidian paths
 
 The orchestrator resolves paths in this order:
@@ -68,12 +66,6 @@ Unauthenticated GitHub API allows 60 requests per hour, which is tight given the
 ```
 
 After this, adding or removing seed authors happens in the X app. The next collection run reflects the change without any code or config edits.
-
-## Reddit access
-
-`reddit-scan.sh` uses the existing `reddit-readonly` skill at `$OPENCLAW_WORKSPACE/skills/reddit-readonly/scripts/reddit-readonly.mjs`. No changes needed to that skill.
-
-The Reddit subreddit allowlist is hardcoded in `scripts/reddit-scan.sh` (currently r/ethereum, r/ethdev, r/ethfinance, r/ethstaker, r/MachineLearning, r/LocalLLaMA). To add or remove subs, edit the `ALLOWED_SUBS` array in that script.
 
 ## Telegram (one-time setup)
 
@@ -155,7 +147,6 @@ Defaults are set in `log-social-signals.sh` and can be overridden via environmen
 
 | Variable | Default | Collector |
 |---|---|---|
-| `REDDIT_HOURS` | 24 | reddit-scan |
 | `SEED_HOURS` | 24 | x-list-scan |
 | `RSS_HOURS` | 48 | rss-scan |
 | `GITHUB_HOURS` | 24 | github-scan |
@@ -188,9 +179,9 @@ jq '.items[0]' $MANIFEST
 Expected outcomes:
 
 - `schema_version`: `"1.1"`
-- `window_hours`: object with five keys (reddit, x_seed, rss, github, arxiv)
-- `collection_diagnostics`: shows non-zero `items_kept` for at least reddit, x_seed, and rss; zero for arxiv on weekends; small number for github
-- Unique sources: should include `"x-seed"`, `"reddit"`, `"rss"`, `"github"`, and possibly `"arxiv"` and `"telegram"`
+- `window_hours`: object with five keys (x_seed, rss, github, arxiv)
+- `collection_diagnostics`: shows non-zero `items_kept` for at least x_seed, and rss; zero for arxiv on weekends; small number for github
+- Unique sources: should include `"x-seed"`, `"rss"`, `"github"`, and possibly `"arxiv"` and `"telegram"`
 - First item: full schema with author, engagement, metadata fields populated
 
 ## Per-collector testing
@@ -200,9 +191,6 @@ Each collector runs standalone for debugging:
 ```bash
 # X List
 sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/x-list-scan.sh 24
-
-# Reddit
-sudo -u clawdbot bash /~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/reddit-scan.sh "" 24
 
 # RSS
 sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/rss-scan.sh 48

@@ -1,6 +1,6 @@
 ---
 name: scout-signal-scan
-description: Run the orchestrated multi-source signal collection pipeline for Scout. Polls allowlisted Reddit subreddits, an X List of seed authors, RSS feeds (research outputs, newsletters, company blogs, forums, core protocol), GitHub releases and EIP commits, arxiv categories with keyword filter, and Telegram. Applies hard negative filters at collection time. Dedups against a rolling 14-day URL store. Emits a JSON manifest the agent processes per AGENTS.md to produce the tiered daily signal file.
+description: Run the orchestrated multi-source signal collection pipeline for Scout. Polls an X List of seed authors, RSS feeds (research outputs, newsletters, company blogs, forums, core protocol), GitHub releases and EIP commits, arxiv categories with keyword filter, and Telegram. Applies hard negative filters at collection time. Dedups against a rolling 14-day URL store. Emits a JSON manifest the agent processes per AGENTS.md to produce the tiered daily signal file.
 ---
 
 # scout-signal-scan
@@ -22,7 +22,6 @@ Wire this into cron at 08:00 UTC. The agent should be triggered shortly after (0
 Each can be run standalone for testing or debugging. All emit a JSON array of items to stdout and diagnostics to stderr.
 
 ```bash
-bash scripts/reddit-scan.sh "<query>" <hours>   # allowlisted subreddits
 bash scripts/x-list-scan.sh <hours>             # X List of seed authors
 bash scripts/rss-scan.sh <hours>                # RSS feeds (research/newsletters/blogs/forums)
 bash scripts/github-scan.sh <hours>             # releases + EIP commits
@@ -33,15 +32,13 @@ bash scripts/arxiv-scan.sh <hours>              # arxiv categories with keyword 
 
 All source lists and filters live in `config/`. These are the runtime source of truth for the scripts. AGENTS.md documents the same lists at a category level for the agent's editorial context; keep the two in sync.
 
-- `config/negative-filters.json` — subreddit blocklist, regex patterns, account shape rules. Patterns use POSIX extended regex syntax (no `(?:...)` non-capturing groups; use `(...)` instead)
+- `config/negative-filters.json` — regex patterns, account shape rules. Patterns use POSIX extended regex syntax (no `(?:...)` non-capturing groups; use `(...)` instead)
 - `config/tracked-entities.json` — EIPs, protocols, companies, technical markers, anchor domains
 - `config/x-list.json` — X List ID and metadata. The List itself, edited in the X app, is the runtime source of truth for who Scout watches on X
 - `config/seed-authors.json` — editorial reference mapping X handles to categories (aa_standards, agent_payments, etc.). Used by x-list-scan to enrich items with `seed_category`. Handles in the List but not here get `seed_category: "uncategorised"`
 - `config/feeds.json` — RSS feeds with per-source caps and category filters
 - `config/github-repos.json` — repos for release watch and EIP file watch
 - `config/arxiv.json` — categories and keyword filter
-
-The Reddit allowlist is embedded in `scripts/reddit-scan.sh` rather than a config file, deliberately — it's short, change-controlled, and rarely edited.
 
 ## Manifest format
 
@@ -64,7 +61,6 @@ Other variables (with sensible defaults):
 
 Per-collector time windows (override via env if needed):
 
-- `REDDIT_HOURS` (default 24)
 - `SEED_HOURS` (default 24) — applies to x-list-scan
 - `RSS_HOURS` (default 48)
 - `GITHUB_HOURS` (default 24)
@@ -79,8 +75,6 @@ Full setup details in `references/SETUP.md`.
 **Link-only tweets have thin metadata.** Tweets that are just a URL (often pointing to an X Article or another tweet) return only the URL as text. The metadata extraction works on whatever text and expanded URLs the API returns; if the substance lives behind the link, it won't appear in the manifest's `metadata` fields. The agent should use `is_seed_author: true` plus `engagement` signals to decide whether to surface these even when metadata is empty.
 
 **arxiv on weekends.** arxiv does not publish new items on Saturdays or Sundays (declared in `<skipDays>` in the feed). Zero items kept from the arxiv collector on Sat/Sun is expected, not a failure.
-
-**Reddit's structural tier ceiling.** Reddit items lack the seed-authorship and seed-engagement signals available on X. Reddit items will essentially only ever reach Tier 3, because the agent's threshold rule requires content specificity alone to clear the bar for Reddit.
 
 **EIP pattern allowlist (under review).** The `eip_pattern` in `config/tracked-entities.json` currently matches only a fixed allowlist of EIP numbers (4337, 7702, 7579, 7710, 7715, 7521, 7683, 8211, 6900, 6492). Commits to other EIPs in the github collector will have `has_eip_reference: false` and empty `eip_numbers`. Broadening the pattern is on the maintenance list.
 
@@ -103,7 +97,6 @@ See `references/AGENT_PROMPT.md` for the exact instruction template.
 The orchestrator captures per-collector stderr and surfaces it in `collection_diagnostics`. Each collector also writes its own diagnostic line to stderr when run standalone, e.g.:
 
 ```
-[reddit-scan] subs_polled=6 successful=6 raw=42 kept=18
 [x-list-scan] tweets_returned=97 kept=10 dropped_timewindow=86 dropped_filters=1
 [rss-scan] feeds_polled=27 successful=26 failed=1
 [github-scan] repos_polled=10 releases=0 eip_changes=2

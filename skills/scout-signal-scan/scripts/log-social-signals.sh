@@ -30,7 +30,6 @@ MARKER_FILE="$MANIFEST_DIR/ready-$DATE_UTC.marker"
 MANIFEST_MD_FILE="$SIGNALS_DIR/manifest-$DATE_UTC.md"
 
 # Default window sizes
-REDDIT_HOURS="${REDDIT_HOURS:-24}"
 SEED_HOURS="${SEED_HOURS:-24}"
 RSS_HOURS="${RSS_HOURS:-48}"
 GITHUB_HOURS="${GITHUB_HOURS:-24}"
@@ -41,9 +40,6 @@ state_init
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
-
-# Default keyword query for the Reddit scan (passed to reddit-scan.sh)
-QUERY='("agentic commerce" OR "agentic payments" OR "machine-to-machine payments" OR "account abstraction" OR "agent wallet" OR "ERC-4337" OR "ERC-7702" OR "x402" OR "agent payment")'
 
 run_collector() {
   local name="$1"; shift
@@ -63,7 +59,6 @@ run_collector() {
   cat "$TMP/$name.err" >&2 || true
 }
 
-run_collector "reddit-scan" "$TMP/reddit.json" bash "$SCRIPT_DIR/reddit-scan.sh" "$QUERY" "$REDDIT_HOURS"
 run_collector "x-list-scan" "$TMP/seed.json"   bash "$SCRIPT_DIR/x-list-scan.sh" "$SEED_HOURS"
 run_collector "rss-scan"    "$TMP/rss.json"    bash "$SCRIPT_DIR/rss-scan.sh" "$RSS_HOURS"
 run_collector "github-scan" "$TMP/github.json" bash "$SCRIPT_DIR/github-scan.sh" "$GITHUB_HOURS"
@@ -111,13 +106,12 @@ if [[ -x "$TELEGRAM_SCRIPT" ]]; then
 fi
 
 # Merge all collector outputs
-MERGED=$(jq -s 'add' "$TMP/reddit.json" "$TMP/seed.json" "$TMP/rss.json" "$TMP/github.json" "$TMP/arxiv.json" "$TELEGRAM_JSON")
+MERGED=$(jq -s 'add' "$TMP/seed.json" "$TMP/rss.json" "$TMP/github.json" "$TMP/arxiv.json" "$TELEGRAM_JSON")
 
 # Apply state-based URL dedup without mutating state until the manifest is safely written
 NEW_ITEMS=$(echo "$MERGED" | state_filter_new_items_no_mark)
 
 # Build collection diagnostics
-REDDIT_COUNT=$(jq 'length' "$TMP/reddit.json")
 SEED_COUNT=$(jq 'length' "$TMP/seed.json")
 RSS_COUNT=$(jq 'length' "$TMP/rss.json")
 GITHUB_COUNT=$(jq 'length' "$TMP/github.json")
@@ -126,7 +120,6 @@ TOTAL_BEFORE_DEDUP=$(echo "$MERGED" | jq 'length')
 TOTAL_AFTER_DEDUP=$(echo "$NEW_ITEMS" | jq 'length')
 
 DIAGNOSTICS=$(jq -nc \
-  --argjson reddit "$REDDIT_COUNT" \
   --argjson seed "$SEED_COUNT" \
   --argjson rss "$RSS_COUNT" \
   --argjson github "$GITHUB_COUNT" \
@@ -135,7 +128,6 @@ DIAGNOSTICS=$(jq -nc \
   --argjson before "$TOTAL_BEFORE_DEDUP" \
   --argjson after "$TOTAL_AFTER_DEDUP" \
   '{
-    reddit:    { items_kept: $reddit },
     x_seed:    { items_kept: $seed },
     rss:       { items_kept: $rss },
     github:    { items_kept: $github },
@@ -158,7 +150,6 @@ if [[ "$DOW" == "7" ]]; then WEEKLY_FLAG="true"; fi
 jq -n \
   --arg captured_at "$CAPTURED_AT" \
   --arg date_utc "$DATE_UTC" \
-  --argjson reddit_hours "$REDDIT_HOURS" \
   --argjson seed_hours "$SEED_HOURS" \
   --argjson rss_hours "$RSS_HOURS" \
   --argjson github_hours "$GITHUB_HOURS" \
@@ -173,7 +164,6 @@ jq -n \
     captured_at: $captured_at,
     date_utc: $date_utc,
     window_hours: {
-      reddit: $reddit_hours,
       x_seed: $seed_hours,
       rss:    $rss_hours,
       github: $github_hours,

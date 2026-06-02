@@ -10,8 +10,8 @@ Scout's daily run is split between a **collection skill** (`scout-signal-scan`) 
 
 The skill runs `scripts/log-social-signals.sh` at 08:00 UTC and:
 
-1. Polls allowlisted Reddit subreddits, the X List, RSS feeds, GitHub releases and EIP commits, arxiv categories, and Telegram
-2. Applies hard negative filters (subreddit blocklist, ticker regex, pump phrases, account shape rules) from `config/negative-filters.json`
+1. Polls the X List, RSS feeds, GitHub releases and EIP commits, arxiv categories, and Telegram
+2. Applies hard negative filters (ticker regex, pump phrases, account shape rules) from `config/negative-filters.json`
 3. Enriches each item with metadata flags (EIP references, anchor domain links, tracked companies/protocols, technical markers) from `config/tracked-entities.json`
 4. Deduplicates against a rolling 14-day URL store at `~/.local/share/scout/seen-urls.jsonl`
 5. Writes the JSON manifest to `/tmp/scout/manifest-YYYY-MM-DD.json` and the marker `/tmp/scout/ready-YYYY-MM-DD.marker`
@@ -50,7 +50,7 @@ From `item.author`: `account_age_days > 365` contributes positively; `followers`
 
 ### 3. Network engagement (positive, weighted by quality)
 
-From `item.engagement`: `seed_engaged_by` non-empty is **strong** signal; a quote-tweet from a seed-set author is the strongest single engagement signal; raw `likes`/`reposts`/`replies`/`quotes` counts are weak on their own. For Reddit, `engagement.likes` is post score; high (not extreme) scores in tracked subs are meaningful.
+From `item.engagement`: `seed_engaged_by` non-empty is **strong** signal; a quote-tweet from a seed-set author is the strongest single engagement signal; raw `likes`/`reposts`/`replies`/`quotes` counts are weak on their own. High (not extreme) scores in tracked subs are meaningful.
 
 ### 4. Negative markers (already applied)
 

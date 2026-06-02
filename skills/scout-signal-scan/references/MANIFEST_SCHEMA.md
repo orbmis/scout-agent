@@ -29,7 +29,7 @@ The manifest is the contract between this skill and the Scout agent. The skill c
 
 ```json
 {
-  "source": "x" | "x-seed" | "reddit" | "rss" | "github" | "arxiv" | "telegram",
+  "source": "x" | "x-seed" | "rss" | "github" | "arxiv" | "telegram",
   "subsource": "@VitalikButerin" | "r/ethereum" | "ethresear.ch - Account Abstraction" | "ethereum/EIPs" | "arxiv:cs.CR" | "...",
   "group": "research_outputs" | "newsletters" | "core_protocol" | "company_blogs" | "forums",
   "tag": "newsletter" | "",
@@ -78,9 +78,9 @@ The agent assigns tiers per AGENTS.md. The default mapping:
 - `source: rss` with `group: company_blogs` → **Tier 0** (primary source from a tracked builder)
 - `source: rss` with `tag: newsletter` → **Tier 0** but flagged as pre-filtered (apply lower content-specificity weight)
 - `source: x-seed` (always `is_seed_author: true`) → **Tier 1**
-- `source: x` or `source: reddit` with `is_seed_author: true` → **Tier 1**
-- `source: x` or `source: reddit` with `seed_engaged_by` non-empty → **Tier 2**
-- `source: x` or `source: reddit`, independent → **Tier 3** (must clear scoring threshold)
+- `source: x` with `is_seed_author: true` → **Tier 1**
+- `source: x` with `seed_engaged_by` non-empty → **Tier 2**
+- `source: x` independent → **Tier 3** (must clear scoring threshold)
 - `source: telegram` → **Tier 2 or 3** depending on engagement context
 
 This mapping is a default; AGENTS.md may refine it.
@@ -104,7 +104,7 @@ The agent should surface diagnostic context in the daily signal file's empty-tie
 ## Hard contract rules
 
 1. **The skill never scores, tiers, or interprets.** Every `metadata` field is an observable presence/absence check.
-2. **The skill applies hard negative filters at collection time.** Items violating subreddit blocklist, ticker patterns, or pump-phrase patterns never appear in the manifest.
+2. **The skill applies hard negative filters at collection time.** Items violating ticker patterns, or pump-phrase patterns never appear in the manifest.
 3. **The skill applies URL dedup against a rolling 14-day window.** Items already seen do not appear.
 4. **The skill does not apply topic-level dedup.** That requires reading prior Signals files, which is the agent's job.
 5. **Manifest fields are stable.** Adding new fields is a minor version bump (1.1); changing or removing fields is a major bump.
