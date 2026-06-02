@@ -6,6 +6,7 @@
   ],
   "newsletters": [
     {"name": "Bankless", "url": "https://www.bankless.com/feed", "max_items_per_run": 5, "tag": "newsletter"},
+    {"name": "Cryptoslate - DeFi", "url": "https://cryptoslate.com/defi/feed", "max_items_per_run": 5, "tag": "newsletter"},
     {"name": "The Defiant - Blockchains", "url": "https://thedefiant.io/feed", "max_items_per_run": 5, "category_filter": "Blockchains", "url_path_filter": "/blockchains/", "tag": "newsletter"}
   ],
   "core_protocol": [
