@@ -9,6 +9,7 @@
     {"name": "CryptoSlate - DeFi", "url": "https://cryptoslate.com/defi/feed", "max_items_per_run": 5, "tag": "newsletter"},
     {"name": "Unchained", "url": "https://unchainedcrypto.com/feed", "max_items_per_run": 5, "tag": "newsletter"},
     {"name": "The Block", "url": "https://www.theblock.co/rss.xml", "max_items_per_run": 5, "tag": "newsletter"},
+    {"name": "CoinDesk", "url": "https://www.coindesk.com/arc/outboundfeeds/rss", "max_items_per_run": 5, "tag": "newsletter"},
     {"name": "The Defiant - Blockchains", "url": "https://thedefiant.io/feed", "max_items_per_run": 5, "category_filter": "Blockchains", "url_path_filter": "/blockchains/", "tag": "newsletter"}
   ],
   "core_protocol": [
