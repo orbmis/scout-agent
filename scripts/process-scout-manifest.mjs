@@ -13,6 +13,9 @@ if (!manifestPath) {
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 const workspaceRoot = "/home/clawdbot/.openclaw/workspace-saorin-scout";
 const userMd = fs.readFileSync(path.join(workspaceRoot, "USER.md"), "utf8");
+const trackedEntities = JSON.parse(
+  fs.readFileSync(path.join(workspaceRoot, "skills/scout-signal-scan/config/tracked-entities.json"), "utf8")
+);
 const stateDir = path.join(process.env.HOME || "/home/clawdbot", ".local/share/scout");
 const tier3AuthorsPath = path.join(stateDir, "tier3-authors.jsonl");
 const signalDate = manifest.date_utc;
@@ -25,6 +28,13 @@ const markerPath = `/tmp/scout/ready-${signalDate}.marker`;
 fs.mkdirSync(signalsDir, { recursive: true });
 fs.mkdirSync(stateDir, { recursive: true });
 
+const trackedCompanies = Object.values(trackedEntities.companies || {}).flat();
+const trackedProtocols = trackedEntities.protocols || [];
+const trackedTechnicalMarkers = trackedEntities.technical_markers || [];
+const trackedAnchorDomains = trackedEntities.anchor_domains || [];
+const trackedEipNumbers = new Set((trackedEntities.eip_numbers || []).map(Number));
+const eipReferencePattern = trackedEntities.eip_pattern ? new RegExp(trackedEntities.eip_pattern, "gi") : /\b(?:ERC|EIP)-?(\d{4})\b/gi;
+
 function stripHtml(input = "") {
   return input
     .replace(/<[^>]+>/g, " ")
@@ -33,8 +43,19 @@ function stripHtml(input = "") {
     .replace(/&gt;/g, ">")
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"')
+    .replace(/\b\d+ post - \d+ participant\b/gi, " ")
+    .replace(/\bRead full topic\b/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function decodeHtml(input = "") {
+  return input
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"');
 }
 
 function textFor(item) {
@@ -80,6 +101,224 @@ function parseTimeMs(value) {
   const ms = Date.parse(value || "");
   return Number.isFinite(ms) ? ms : null;
 }
+
+function parseDiscourseThreadStats(text = "") {
+  const match = text.match(/(\d+)\s+posts?\s+-\s+(\d+)\s+participants?/i);
+  if (!match) return null;
+  return {
+    posts: Number(match[1]),
+    participants: Number(match[2]),
+  };
+}
+
+function normalizeUrl(value) {
+  try {
+    return new URL(value).toString();
+  } catch {
+    return value || "";
+  }
+}
+
+function anchorKeyForUrl(value) {
+  try {
+    const url = new URL(value);
+    return `${url.hostname.toLowerCase()}${url.pathname}`.replace(/\/+$/, "");
+  } catch {
+    return "";
+  }
+}
+
+function anchorMatches(value) {
+  const key = anchorKeyForUrl(value);
+  if (!key) return false;
+  return trackedAnchorDomains.some((anchor) => {
+    const normalizedAnchor = anchor.toLowerCase().replace(/^https?:\/\//, "").replace(/\/+$/, "");
+    return key === normalizedAnchor || key.startsWith(`${normalizedAnchor}/`);
+  });
+}
+
+function extractTrackedEipNumbers(text = "") {
+  const found = new Set();
+  for (const match of text.matchAll(eipReferencePattern)) {
+    const value = Number(match[1]);
+    if (Number.isFinite(value)) found.add(value);
+  }
+  return Array.from(found);
+}
+
+function extractMetadata(text = "", urls = []) {
+  const normalizedText = stripHtml(decodeHtml(text));
+  const lc = normalizedText.toLowerCase();
+  const eipNumbers = extractTrackedEipNumbers(normalizedText);
+  const anchorDomainLinks = Array.from(new Set(urls.filter((url) => anchorMatches(url)).map((url) => {
+    try {
+      return new URL(url).hostname.toLowerCase();
+    } catch {
+      return url;
+    }
+  })));
+  const tracked_companies = trackedCompanies.filter((company) => lc.includes(company.toLowerCase()));
+  const tracked_protocols = trackedProtocols.filter((protocol) => lc.includes(protocol.toLowerCase()));
+  const technical_markers = trackedTechnicalMarkers.filter((marker) => lc.includes(marker.toLowerCase()));
+
+  return {
+    has_eip_reference: eipNumbers.some((n) => trackedEipNumbers.has(n)),
+    eip_numbers: eipNumbers.filter((n) => trackedEipNumbers.has(n)),
+    has_code_block: /<pre|<code|\`\`\`/.test(text),
+    anchor_domain_links: anchorDomainLinks,
+    tracked_companies,
+    tracked_protocols,
+    technical_markers,
+  };
+}
+
+function parseFlashbotsNewsletterItems(html = "") {
+  const entries = [];
+  const tokenPattern = /(<[^>]+>)|([^<]+)/g;
+  let currentSection = "";
+  let inHeading = false;
+  let headingBuffer = "";
+  let ulDepth = 0;
+  let liDepth = 0;
+  let itemBuffer = "";
+  let itemSection = "";
+
+  for (const match of html.matchAll(tokenPattern)) {
+    const raw = match[0];
+    const tag = match[1];
+    const text = match[2];
+
+    if (tag) {
+      const tagMatch = tag.match(/^<\/?\s*([a-zA-Z0-9]+)/);
+      const tagName = tagMatch?.[1]?.toLowerCase() || "";
+      const isClose = /^<\//.test(tag);
+
+      if (tagName === "h1") {
+        if (isClose) {
+          inHeading = false;
+          currentSection = stripHtml(headingBuffer);
+        } else {
+          inHeading = true;
+          headingBuffer = "";
+        }
+      }
+
+      if (tagName === "ul") {
+        ulDepth = isClose ? Math.max(0, ulDepth - 1) : ulDepth + 1;
+      }
+
+      if (tagName === "li") {
+        if (!isClose) {
+          if (ulDepth === 1 && liDepth === 0) {
+            itemBuffer = raw;
+            itemSection = currentSection;
+          }
+          liDepth += 1;
+          if (itemBuffer !== raw && itemBuffer) itemBuffer += raw;
+        } else if (itemBuffer) {
+          itemBuffer += raw;
+        }
+
+        if (isClose) {
+          liDepth = Math.max(0, liDepth - 1);
+          if (ulDepth === 1 && liDepth === 0 && itemBuffer) {
+            entries.push({ section: itemSection, html: itemBuffer });
+            itemBuffer = "";
+            itemSection = "";
+          }
+        }
+        continue;
+      }
+
+      if (inHeading && tagName !== "h1") headingBuffer += raw;
+      if (itemBuffer) itemBuffer += raw;
+      continue;
+    }
+
+    if (typeof text === "string") {
+      if (inHeading) headingBuffer += text;
+      if (itemBuffer) itemBuffer += text;
+    }
+  }
+
+  return entries;
+}
+
+function chooseFlashbotsNewsletterLink(section, itemHtml) {
+  const topLevelHtml = itemHtml.replace(/<ul[\s\S]*?<\/ul>/gi, " ");
+  const anchors = Array.from(topLevelHtml.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi))
+    .map((match) => ({
+      href: normalizeUrl(decodeHtml(match[1] || "")),
+      label: stripHtml(decodeHtml(match[2] || "")),
+    }))
+    .filter((anchor) => anchor.href);
+
+  const genericLabels = new Set(["post", "thread", "agenda", "notes", "note", "read full topic", "sign up here"]);
+  const scored = anchors.map((anchor) => {
+    const href = anchor.href.toLowerCase();
+    const label = anchor.label.toLowerCase();
+    let score = 0;
+
+    if (/x\.com\/[^/]+\/status\//.test(href)) score += 8;
+    if (/arxiv\.org|ethresear\.ch|eips\.ethereum\.org|github\.com|youtube\.com|youtu\.be|notes\.ethereum\.org|ethereum\.foundation|forum\.arbitrum\.foundation|ethpandaops\.io|ecdsa\.fail|fastconfirm\.it|etherworld\.co|vitalik\.eth\.limo/.test(href)) score += 5;
+    if (/collective\.flashbots\.net\/u\//.test(href)) score -= 6;
+    if (/x\.com\/[^/]+\/?$/.test(href)) score -= 5;
+    if (/^https?:\/\/[^/]+\/?$/.test(href)) score -= 4;
+    if (/collective\.flashbots\.net\/t\/the-mev-letter/i.test(href)) score -= 8;
+    if (genericLabels.has(label)) score -= 5;
+    if (/^@/.test(label)) score -= 4;
+    if (label.length >= 12) score += 2;
+    if (/papers? & articles/i.test(section) && /arxiv\.org|ethresear\.ch|eips\.ethereum\.org/.test(href)) score += 3;
+    if (/talks? & discussions?/i.test(section) && /youtube\.com|youtu\.be/.test(href)) score += 3;
+    if (/posts? & threads?/i.test(section) && /x\.com\/[^/]+\/status\//.test(href)) score += 4;
+
+    return { ...anchor, score };
+  }).sort((a, b) => b.score - a.score);
+
+  return {
+    anchor: scored[0] || null,
+    urls: Array.from(new Set(anchors.map((anchor) => anchor.href))),
+    summaryHtml: topLevelHtml,
+  };
+}
+
+function summarizeFlashbotsNewsletterItem(itemHtml) {
+  const summary = stripHtml(
+    decodeHtml(
+      itemHtml
+        .replace(/<ul[\s\S]*?<\/ul>/gi, " ")
+    )
+  );
+  return summary.length <= 420 ? summary : summary.slice(0, 417).trimEnd() + "...";
+}
+
+function expandFlashbotsNewsletterItem(item) {
+  if (item.source !== "rss" || item.subsource !== "Flashbots MEV Newsletter") return [item];
+  const parsedItems = parseFlashbotsNewsletterItems(item.text || "");
+  const expanded = [];
+
+  for (const parsed of parsedItems) {
+    const chosen = chooseFlashbotsNewsletterLink(parsed.section, parsed.html);
+    if (!chosen.anchor) continue;
+    const summary = summarizeFlashbotsNewsletterItem(parsed.html);
+    const title = chosen.anchor.label && !/^(post|thread|agenda|notes?|read full topic)$/i.test(chosen.anchor.label)
+      ? chosen.anchor.label
+      : summary.slice(0, 120).trim();
+    if (!title || !chosen.anchor.href) continue;
+
+    expanded.push({
+      ...item,
+      url: chosen.anchor.href,
+      title,
+      text: summary,
+      metadata: extractMetadata(summary, chosen.urls),
+    });
+  }
+
+  return expanded.length ? expanded : [item];
+}
+
+const expandedManifestItems = manifest.items.flatMap((item) => expandFlashbotsNewsletterItem(item));
 
 const trackedTopicPatterns = [
   /agentic commerce/i,
@@ -217,6 +456,7 @@ function scoreItem(item) {
   const text = textFor(item);
   const lc = text.toLowerCase();
   const title = item.title || "";
+  const discourseStats = parseDiscourseThreadStats(item.text || "");
 
   const axisScores = {
     content: 0,
@@ -304,7 +544,15 @@ function scoreItem(item) {
 
   let exclusionClass = null;
   let reason = null;
-  if (!hasRequiredAnchorSignal) {
+  if (
+    item.source === "rss" &&
+    item.subsource === "Ethereum Magicians" &&
+    discourseStats &&
+    discourseStats.posts <= 1
+  ) {
+    exclusionClass = "below_threshold";
+    reason = "The Ethereum Magicians topic only has the original post and no replies yet.";
+  } else if (!hasRequiredAnchorSignal) {
     exclusionClass = "missing_anchor_signal";
     reason = "It never picked up a required anchor signal and the underlying content is too thin to stand alone.";
   } else if (!passesScore) {
@@ -409,6 +657,9 @@ function formatAuthor(item) {
   const author = item.author || {};
   if (author.handle) {
     const age = author.account_age_days ? ` · account age ${author.account_age_days} days` : "";
+    if (item.source === "rss" || item.source === "github" || item.source === "arxiv") {
+      return `${author.display_name || author.handle}${age}`;
+    }
     return `@${author.handle}${age}`;
   }
   return author.display_name || item.subsource || "Unknown";
@@ -482,7 +733,7 @@ const kept = [];
 const filtered = [];
 const intraDayClusters = new Map();
 
-for (const item of manifest.items) {
+for (const item of expandedManifestItems) {
   const score = scoreItem(item);
   if (score.exclusionClass) {
     filtered.push({ item, ...score, exclusionClass: score.exclusionClass, reason: score.reason });
@@ -491,13 +742,18 @@ for (const item of manifest.items) {
   const tier = assignTier(item);
   const topicKeyParts = [];
   const text = lowerText(item);
-  const matchedEips = Array.from((text.matchAll(/(?:eip|erc)[- ]?(4337|7702|7579|7710|7715|7521|7683|8211|7928|8264|8253|7773)/g))).map((m) => m[1]);
-  if (matchedEips.length) topicKeyParts.push(`eip:${matchedEips[0]}`);
-  if (/catena labs/i.test(text)) topicKeyParts.push("catena-labs");
-  if (/taskmarket/i.test(text)) topicKeyParts.push("taskmarket");
-  if (/proof of human|identity/i.test(text)) topicKeyParts.push("identity");
-  if (/stablecoin|payments?|merchant|remittance/i.test(text)) topicKeyParts.push("payments");
-  if (!topicKeyParts.length) topicKeyParts.push(item.url);
+  const isPrimarySource = item.source === "rss" || item.source === "github" || item.source === "arxiv";
+  if (isPrimarySource) {
+    topicKeyParts.push(item.url);
+  } else {
+    const matchedEips = Array.from((text.matchAll(/(?:eip|erc)[- ]?(4337|7702|7579|7710|7715|7521|7683|8211|7928|8264|8253|7773)/g))).map((m) => m[1]);
+    if (matchedEips.length) topicKeyParts.push(`eip:${matchedEips[0]}`);
+    if (/catena labs/i.test(text)) topicKeyParts.push("catena-labs");
+    if (/taskmarket/i.test(text)) topicKeyParts.push("taskmarket");
+    if (/proof of human|identity/i.test(text)) topicKeyParts.push("identity");
+    if (/stablecoin|payments?|merchant|remittance/i.test(text)) topicKeyParts.push("payments");
+    if (!topicKeyParts.length) topicKeyParts.push(item.url);
+  }
   const topicKey = topicKeyParts.join("|");
   const clusterKeys = [topicKey, ...(threadClusterKey(item) || [])];
   const existing = clusterKeys
@@ -600,14 +856,13 @@ const dailyLines = [
   "## Daily social scan",
   `- **Captured (UTC):** ${manifest.captured_at}`,
   `- **Manifest:** \`${manifestPath}\``,
-  `- **Scan windows:** Reddit ${manifest.window_hours?.reddit ?? 24}h · X seed ${manifest.window_hours?.x_seed ?? 24}h · RSS ${manifest.window_hours?.rss ?? 48}h · GitHub ${manifest.window_hours?.github ?? 24}h · arXiv ${manifest.window_hours?.arxiv ?? 48}h`,
+  `- **Scan windows:** X seed ${manifest.window_hours?.x_seed ?? 24}h · RSS ${manifest.window_hours?.rss ?? 48}h · GitHub ${manifest.window_hours?.github ?? 24}h · arXiv ${manifest.window_hours?.arxiv ?? 48}h`,
   "",
   renderTier(0, "Tier 0 — Primary Source", `No Tier 0 items were surfaced. RSS kept ${diag.rss?.items_kept ?? 0} items and GitHub kept ${diag.github?.items_kept ?? 0}, but none cleared the editorial threshold after scoring.`),
   renderTier(1, "Tier 1 — Seed-Set Signal", `No Tier 1 items were surfaced. X seed kept ${diag.x_seed?.items_kept ?? 0} items, but none cleared threshold after substance checks.`),
   renderTier(2, "Tier 2 — Seed-Adjacent Signal", `No seed-adjacent items were surfaced. Collection kept ${diag.x_seed?.items_kept ?? 0} X seed items, but no non-seed author in today's manifest carried usable seed-engagement context.`),
-  renderTier(3, "Tier 3 — Independent Signal", `Reddit kept ${diag.reddit?.items_kept ?? 0} items and arXiv kept ${diag.arxiv?.items_kept ?? 0} items in today's manifest, so no independent candidates cleared into the final note.`),
+  renderTier(3, "Tier 3 — Independent Signal", `No independent candidates cleared into the final note. Today's manifest included ${diag.arxiv?.items_kept ?? 0} arXiv items and ${diag.telegram?.items_kept ?? 0} Telegram items after collection-time filtering.`),
   "## Collection diagnostics",
-  `- **Reddit:** ${diag.reddit?.items_kept ?? 0} items kept after filtering.`,
   `- **X seed scan:** ${diag.x_seed?.items_kept ?? 0} items kept at collection time.`,
   `- **RSS:** ${diag.rss?.items_kept ?? 0} items kept at collection time.`,
   `- **GitHub:** ${diag.github?.items_kept ?? 0} items kept at collection time.`,

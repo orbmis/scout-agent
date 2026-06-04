@@ -24,7 +24,9 @@ When the marker appears, Scout:
 
 1. Loads the manifest. Reads `captured_at`, `date_utc`, `weekly_report_due`, `previous_signals_files`, `collection_diagnostics`
 2. For each item, computes a composite score using the four-axis framework below
+   Flashbots MEV Newsletter entries are first unpacked into their underlying linked items when the RSS body contains multiple candidate signals; score the child items, not the wrapper newsletter topic.
 3. Drops items below threshold (see Threshold rule)
+   For Ethereum Magicians specifically, ignore topics that still show only the original post and no replies in the RSS thread stats.
 4. Assigns each surviving item to Tier 0–3 using the source-to-tier mapping below, consistent with the manifest defaults in `references/MANIFEST_SCHEMA.md`
 5. Applies topic-level dedup against `previous_signals_files` (last 14 days)
 6. Annotates items that materially extend USER.md's writing focus or hypotheses
