@@ -69,3 +69,4 @@ Manifest: /tmp/scout/manifest-{DATE}.json
 - The instruction is deliberately terse on rules — AGENTS.md is where the rules live. If the agent doesn't have AGENTS.md loaded into its session, this will not work.
 - Marker deletion at step 11 makes the trigger idempotent. If the agent fails mid-run, the marker remains and the next trigger will reprocess.
 - For OpenClaw setups using a scheduled session: have the scheduler check for the marker file at every cycle (e.g. every 15 minutes) and invoke Scout with the template above only when one is present.
+- For the current cron setup, prefer running `scripts/run-daily-scout.sh` from the agent turn and using its JSON output for the user-facing summary, instead of asking the model to manually score and write the whole note inline during the cron run.

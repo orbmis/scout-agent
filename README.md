@@ -27,6 +27,8 @@ Two halves, decoupled by a JSON manifest:
 
 The skill is mechanical; the agent is editorial. Neither does the other's job.
 
+For scheduled runs, use `scripts/run-daily-scout.sh` as the local entry point for the heavy work. It runs collection, invokes `scripts/process-scout-manifest.mjs`, and returns a compact JSON summary for the outer agent turn to relay, which avoids timing out while manually re-processing large manifests in-model.
+
 ## File layout
 
 ```
@@ -195,6 +197,9 @@ Full schema in `skills/scout-signal-scan/references/MANIFEST_SCHEMA.md`. Source-
 ```bash
 # Manual collection run
 sudo -u clawdbot bash ~/.openclaw/workspace-saorin-scout/skills/scout-signal-scan/scripts/log-social-signals.sh
+
+# Manual end-to-end run with JSON summary
+bash ~/.openclaw/workspace-saorin-scout/scripts/run-daily-scout.sh
 
 # Inspect today's manifest
 MANIFEST=/tmp/scout/manifest-$(date -u +%F).json
