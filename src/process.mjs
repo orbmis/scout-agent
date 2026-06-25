@@ -61,7 +61,7 @@ export function evaluate(manifestItems, { previousEntries = [], extractMetadata 
 export function processManifest(config, manifestPath) {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const metadata = buildMetadata(config.editorial.tracked);
-  const state = buildState({ stateDir: config.stateDir, seenWindowDays: config.seenWindowDays });
+  const state = buildState({ stateDir: config.stateDir, seenWindowDays: config.seenWindowDays, nowMs: config.nowMs });
 
   const signalDate = manifest.date_utc;
   const signalsDir = manifest.signals_dir || config.signalsDir;

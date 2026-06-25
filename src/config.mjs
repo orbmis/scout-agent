@@ -40,6 +40,17 @@ export function loadEnvFile(file) {
   return loaded;
 }
 
+// Logical clock: SCOUT_NOW may be epoch ms or an ISO date, used to pin time for
+// deterministic runs (selftest, replay). Falls back to the real clock.
+function resolveNow() {
+  const raw = process.env.SCOUT_NOW;
+  if (!raw) return Date.now();
+  const asNum = Number(raw);
+  if (Number.isFinite(asNum)) return asNum;
+  const ms = Date.parse(raw);
+  return Number.isFinite(ms) ? ms : Date.now();
+}
+
 export function loadConfig() {
   loadEnvFile();
 
@@ -63,6 +74,7 @@ export function loadConfig() {
     signalsDir,
     manifestDir,
     stateDir,
+    nowMs: resolveNow(),
     seenWindowDays: intEnv("SCOUT_SEEN_WINDOW_DAYS", 14),
     windows: {
       x_seed: intEnv("SEED_HOURS", 24),

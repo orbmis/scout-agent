@@ -120,14 +120,24 @@ an explicit `status` in the diagnostics — the run still succeeds.
 ## Run
 
 ```bash
-scout diagnose                 # preflight: config, credentials, connectivity
-scout collect                  # collect only → writes manifest + marker
+scout diagnose                 # fast preflight: config, credentials, connectivity
+scout doctor                   # deep per-source diagnosis with remediations
+scout collect [--report f]     # collect only → writes manifest + marker
 scout process <manifest.json>  # editorial only → writes signal files
-scout run                      # collect (or reuse today's manifest) then process
+scout run [--report f]         # collect (or reuse today's manifest) then process
+scout selftest                 # offline golden proof of the editorial pipeline
 ```
 
 (or `node bin/scout.mjs <cmd>`, or `npm run <cmd>`). All commands print a JSON
-summary to stdout; diagnostics go to stderr.
+summary to stdout and exit non-zero on failure (`diagnose`/`doctor` when not
+healthy, `collect`/`run` on a hard collection failure, `selftest` on a golden
+mismatch). Useful flags: `--report <path>` writes the run report; `--now <iso|ms>`
+pins the clock for reproducible runs.
+
+Every `collect`/`run` also writes a machine-readable health report to
+`$SCOUT_STATE_DIR/last-run.json` — per-collector counts, statuses, timings, and
+`warnings[]` (e.g. `slow_run`, `collector_error`, `zero_items_all_sources`). This
+is the single artifact both humans and CI read.
 
 ### Scheduling
 
@@ -145,12 +155,25 @@ idempotent by design.
 ## Test & diagnose
 
 ```bash
-npm test          # offline unit + collector + end-to-end tests (no network, no creds)
-scout diagnose    # live: checks bins, paths, credentials, and source connectivity
+npm test            # offline unit + collector + integration tests (no network, no creds)
+npm run test:coverage   # same, with a coverage report
+scout selftest      # one-command offline proof of the editorial pipeline (golden diff)
+scout diagnose      # live: bins, paths, credentials, source connectivity
+scout doctor        # live: per-feed reachability, GitHub rate limit, X List, telegram session
 ```
 
-The test suite stubs the HTTP layer (`src/lib/http.mjs`) so collectors and the
-editorial engine run fully offline against fixtures in `test/fixtures/`.
+The suite stubs the HTTP layer (`src/lib/http.mjs`) so collectors and the
+editorial engine run fully offline against fixtures in `test/fixtures/`. To
+refresh fixtures from live data, run any collector with
+`SCOUT_HTTP_MODE=record SCOUT_HTTP_FIXTURES=<dir>`, then replay with
+`SCOUT_HTTP_MODE=replay`.
+
+**CI:** `.github/workflows/ci.yml` runs the suite + `selftest` on Node 18/20 for
+every push and PR. `.github/workflows/live-test.yml` runs a **public-source live
+canary** when a maintainer comments `/live-test` on a PR — it collects from
+RSS/GitHub/arxiv (no secrets), asserts the run report, and posts the result back
+as a comment. Editing the golden manifest? regenerate with
+`SCOUT_SELFTEST_UPDATE=1 scout selftest`.
 
 ## Telegram setup
 

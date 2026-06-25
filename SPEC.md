@@ -56,6 +56,19 @@ editorial engine (`scout process`). Written to
 `metadata` is computed at collection time by `src/lib/metadata.mjs` from
 `config/editorial.json → tracked`. It is the raw material for scoring.
 
+The manifest is validated against `src/lib/manifest-schema.mjs` before it is
+written (collection) and before it is consumed (processing); a malformed manifest
+fails loudly with the offending field path.
+
+## The run report (`last-run.json`)
+
+Every `collect`/`run` writes `$SCOUT_STATE_DIR/last-run.json` (`src/report.mjs`):
+per-collector `{items, status, ms}`, dedup before/after, timings, and `warnings[]`
+(`slow_run` > 180s, `collector_error`, `zero_items_all_sources`). `ok` is false
+only on a hard failure (every collector errored). This is what `scout` exit codes,
+the `/live-test` canary, and humans all read. `canaryVerdict()` derives the
+public-source pass/fail (RSS/GitHub/arxiv reachable and non-empty).
+
 ## Collection
 
 The mechanical half. Each collector (`src/collectors/*.mjs`) shares one interface

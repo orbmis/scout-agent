@@ -3,12 +3,12 @@
 import { getText } from "../lib/http.mjs";
 import { parseFeed } from "../lib/feed.mjs";
 
-export async function collect({ windowHours, sources, filters, metadata, http = { getText } }) {
+export async function collect({ windowHours, sources, filters, metadata, nowMs = Date.now(), http = { getText } }) {
   const cfg = sources.arxiv || {};
   const categories = cfg.categories || [];
   const keywords = (cfg.keyword_filter || []).map((k) => k.toLowerCase());
   const diag = { cats_polled: 0, items_kept: 0 };
-  const cutoff = Math.floor(Date.now() / 1000) - windowHours * 3600;
+  const cutoff = Math.floor(nowMs / 1000) - windowHours * 3600;
   const items = [];
 
   for (const cat of categories) {

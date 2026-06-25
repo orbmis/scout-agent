@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.1",
+  "captured_at": "2026-06-25T08:00:00Z",
+  "date_utc": "2026-06-25",
+  "window_hours": { "x_seed": 24, "rss": 48, "github": 24, "arxiv": 48 },
+  "signals_dir": "/golden/Signals",
+  "previous_signals_files": [],
+  "weekly_report_due": false,
+  "collection_diagnostics": {
+    "x_seed": { "items_kept": 2 },
+    "rss": { "items_kept": 1 },
+    "github": { "items_kept": 1 },
+    "arxiv": { "items_kept": 1 },
+    "telegram": { "status": "no_channels", "items_kept": 0 },
+    "dedup": { "total_before": 5, "total_after": 5 }
+  },
+  "items": [
+    {
+      "source": "rss", "group": "core_protocol", "subsource": "Ethereum Blog",
+      "title": "ERC-4337 account abstraction update", "url": "https://blog.ethereum.org/aa",
+      "text": "Deep dive into ERC-4337 bundlers, paymaster and session keys for smart accounts.",
+      "author": { "handle": "Ethereum Blog" }, "engagement": {}, "created_at": "2026-06-24T12:00:00Z",
+      "metadata": { "has_eip_reference": true, "eip_numbers": [4337], "has_code_block": false, "anchor_domain_links": ["blog.ethereum.org"], "tracked_companies": [], "tracked_protocols": [], "technical_markers": ["smart account", "session key"] }
+    },
+    {
+      "source": "github", "subsource": "ethereum/EIPs", "event": "eip-commit",
+      "title": "EIPs commit: Update ERC-7702", "url": "https://github.com/ethereum/EIPs/commit/abc",
+      "text": "Update ERC-7702 delegation semantics", "author": { "handle": "someone" }, "engagement": {}, "created_at": "2026-06-25T01:00:00Z",
+      "metadata": { "has_eip_reference": true, "eip_numbers": [7702], "has_code_block": false, "anchor_domain_links": [], "tracked_companies": [], "tracked_protocols": [], "technical_markers": ["delegated execution"] }
+    },
+    {
+      "source": "arxiv", "subsource": "arxiv:cs.CR",
+      "title": "Threshold signatures for agent wallets", "url": "https://arxiv.org/abs/2606.00001",
+      "text": "A threshold signature scheme for MPC wallet session keys and account abstraction.", "author": { "handle": "arxiv:cs.CR" }, "engagement": {}, "created_at": "2026-06-24T00:00:00Z",
+      "metadata": { "has_eip_reference": false, "eip_numbers": [], "has_code_block": false, "anchor_domain_links": ["arxiv.org"], "tracked_companies": [], "tracked_protocols": [], "technical_markers": ["threshold signature", "MPC wallet", "session key", "account abstraction"] }
+    },
+    {
+      "source": "x-seed", "subsource": "@VitalikButerin",
+      "url": "https://x.com/VitalikButerin/status/1",
+      "text": "New thoughts on ERC-7702 smart account delegation and session keys",
+      "author": { "handle": "VitalikButerin", "display_name": "Vitalik", "is_seed_author": true, "seed_category": "aa_standards", "account_age_days": 5000, "followers": 500000, "bio": "ethereum" },
+      "engagement": { "likes": 100, "reposts": 20, "replies": 5, "quotes": 4 },
+      "created_at": "2026-06-25T06:00:00Z",
+      "metadata": { "has_eip_reference": true, "eip_numbers": [7702], "has_code_block": false, "anchor_domain_links": [], "tracked_companies": [], "tracked_protocols": [], "technical_markers": ["smart account", "session key"] },
+      "expanded_urls": []
+    },
+    {
+      "source": "x-seed", "subsource": "@moonboy",
+      "url": "https://x.com/moonboy/status/2", "text": "gm",
+      "author": { "handle": "moonboy", "is_seed_author": true, "seed_category": "uncategorised", "account_age_days": 10, "followers": 5 },
+      "engagement": {}, "created_at": "2026-06-25T07:00:00Z",
+      "metadata": { "has_eip_reference": false, "eip_numbers": [], "has_code_block": false, "anchor_domain_links": [], "tracked_companies": [], "tracked_protocols": [], "technical_markers": [] }
+    }
+  ]
+}

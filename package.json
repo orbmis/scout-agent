@@ -15,6 +15,9 @@
     "process": "node bin/scout.mjs process",
     "run": "node bin/scout.mjs run",
     "diagnose": "node bin/scout.mjs diagnose",
-    "test": "node --test"
+    "doctor": "node bin/scout.mjs doctor",
+    "selftest": "node bin/scout.mjs selftest",
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage"
   }
 }

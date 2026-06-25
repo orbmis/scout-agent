@@ -1,0 +1,78 @@
+name: Live test (/live-test)
+
+# Public-source live canary, triggered by commenting `/live-test` on a PR.
+# No repository secrets are used, so checking out PR (incl. fork) code is safe:
+# the canary only hits public RSS/GitHub/arxiv endpoints.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  live-test:
+    # Only on PR comments that say /live-test, from users with write access.
+    if: >
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/live-test') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acknowledge
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              comment_id: context.payload.comment.id, content: 'eyes',
+            });
+
+      - name: Check out the PR head
+        uses: actions/checkout@v4
+      - name: Fetch PR branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr checkout ${{ github.event.issue.number }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Live public-source canary
+        id: canary
+        env:
+          SCOUT_SIGNALS_DIR: ${{ runner.temp }}/Signals
+          SCOUT_MANIFEST_DIR: ${{ runner.temp }}/scout
+          SCOUT_STATE_DIR: ${{ runner.temp }}/state
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # public read; raises rate limit only
+          CANARY_SUMMARY_FILE: ${{ runner.temp }}/summary.md
+        run: |
+          set +e
+          node bin/scout.mjs collect --report "${{ runner.temp }}/report.json"
+          node src/canary-check.mjs "${{ runner.temp }}/report.json"
+          echo "verdict=$?" >> "$GITHUB_OUTPUT"
+          cat "${{ runner.temp }}/summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post result comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = process.env.RUNNER_TEMP + '/summary.md';
+            const body = fs.existsSync(path) ? fs.readFileSync(path, 'utf8') : '### Scout live canary — ❌ failed before producing a report';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number, body,
+            });
+
+      - name: Reflect verdict in the job status
+        if: always()
+        run: test "${{ steps.canary.outputs.verdict }}" = "0"
