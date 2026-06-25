@@ -1,0 +1,724 @@
+{
+  "_comment": "Single source-of-truth for what Scout collects. Edit X coverage via the X List in the app (list_id below); edit feeds/repos/arxiv/telegram here.",
+  "x": {
+    "list_id": "2056288007821357186",
+    "list_url": "https://x.com/i/lists/2056288007821357186",
+    "max_results": 100,
+    "seed_authors": [
+      {
+        "handle": "VitalikButerin",
+        "category": "aa_standards",
+        "note": "Vitalik Buterin"
+      },
+      {
+        "handle": "danfinlay",
+        "category": "aa_standards",
+        "note": "Dan Finlay - MetaMask, delegation"
+      },
+      {
+        "handle": "a16zcrypto",
+        "category": "agentic_ai_x_crypto",
+        "note": "a16z crypto research"
+      },
+      {
+        "handle": "RyanSAdams",
+        "category": "analysts",
+        "note": "Ryan Sean Adams - Bankless"
+      },
+      {
+        "handle": "TrustlessState",
+        "category": "analysts",
+        "note": "David Hoffman - Bankless"
+      },
+      {
+        "handle": "0xclawlens",
+        "category": "uncategorised",
+        "note": "ClawCash"
+      },
+      {
+        "handle": "0xFrame",
+        "category": "uncategorised",
+        "note": "frame.eth"
+      },
+      {
+        "handle": "0xJeff",
+        "category": "uncategorised",
+        "note": "0xJeff"
+      },
+      {
+        "handle": "13yearoldvc",
+        "category": "uncategorised",
+        "note": "jessy"
+      },
+      {
+        "handle": "a16z",
+        "category": "uncategorised",
+        "note": "a16z"
+      },
+      {
+        "handle": "ADINonline",
+        "category": "uncategorised",
+        "note": "ADIN"
+      },
+      {
+        "handle": "agent0lab",
+        "category": "uncategorised",
+        "note": "agent0 Lab"
+      },
+      {
+        "handle": "ambire",
+        "category": "uncategorised",
+        "note": "ambire.eth"
+      },
+      {
+        "handle": "arc",
+        "category": "uncategorised",
+        "note": "Arc"
+      },
+      {
+        "handle": "arik_g",
+        "category": "uncategorised",
+        "note": "Arik Galansky"
+      },
+      {
+        "handle": "arscontexta",
+        "category": "uncategorised",
+        "note": "Heinrich"
+      },
+      {
+        "handle": "ASI_Alliance",
+        "category": "uncategorised",
+        "note": "Artificial Superintelligence Alliance"
+      },
+      {
+        "handle": "awrigh01",
+        "category": "uncategorised",
+        "note": "Aaron Wright"
+      },
+      {
+        "handle": "bankrbot",
+        "category": "uncategorised",
+        "note": "Bankr"
+      },
+      {
+        "handle": "baseapp",
+        "category": "uncategorised",
+        "note": "Base App"
+      },
+      {
+        "handle": "bondoncredit",
+        "category": "uncategorised",
+        "note": "bond.credit"
+      },
+      {
+        "handle": "C1aranMurray",
+        "category": "uncategorised",
+        "note": "Ciarán Murray"
+      },
+      {
+        "handle": "CastilloLaurent",
+        "category": "uncategorised",
+        "note": "Laurent Castillo"
+      },
+      {
+        "handle": "catena_labs",
+        "category": "uncategorised",
+        "note": "Catena"
+      },
+      {
+        "handle": "Celo",
+        "category": "uncategorised",
+        "note": "Celo"
+      },
+      {
+        "handle": "clawdbotatg",
+        "category": "uncategorised",
+        "note": "clawd.atg.eth"
+      },
+      {
+        "handle": "clawplaza_ai",
+        "category": "uncategorised",
+        "note": "ClawPlaza"
+      },
+      {
+        "handle": "Cobo_Global",
+        "category": "uncategorised",
+        "note": "Cobo"
+      },
+      {
+        "handle": "CoinbaseInsto",
+        "category": "uncategorised",
+        "note": "Coinbase Institutional 🛡️"
+      },
+      {
+        "handle": "corey__cooper",
+        "category": "uncategorised",
+        "note": "Corey Cooper"
+      },
+      {
+        "handle": "crossmint",
+        "category": "uncategorised",
+        "note": "Crossmint"
+      },
+      {
+        "handle": "cryp_to_mantis",
+        "category": "uncategorised",
+        "note": "Nacho"
+      },
+      {
+        "handle": "cyberdrk",
+        "category": "uncategorised",
+        "note": "𝒟𝑒𝓇𝑒𝓀 ✨"
+      },
+      {
+        "handle": "DavideCrapis",
+        "category": "uncategorised",
+        "note": "Davide Crapis"
+      },
+      {
+        "handle": "daydreamsagents",
+        "category": "uncategorised",
+        "note": "Daydreams.Systems (x402, 8004 agents)"
+      },
+      {
+        "handle": "debsoon",
+        "category": "uncategorised",
+        "note": "Debbie Soon"
+      },
+      {
+        "handle": "dee_centralized",
+        "category": "uncategorised",
+        "note": "Dayana Aleksandrova"
+      },
+      {
+        "handle": "deltadotnetwork",
+        "category": "uncategorised",
+        "note": "delta"
+      },
+      {
+        "handle": "DennisonBertram",
+        "category": "uncategorised",
+        "note": "Dennison"
+      },
+      {
+        "handle": "dynamic_xyz",
+        "category": "uncategorised",
+        "note": "Dynamic"
+      },
+      {
+        "handle": "elizaOS",
+        "category": "uncategorised",
+        "note": "elizaOS"
+      },
+      {
+        "handle": "elytro_eth",
+        "category": "uncategorised",
+        "note": "Elytro.eth"
+      },
+      {
+        "handle": "Esk3nder",
+        "category": "uncategorised",
+        "note": "Eskender.eth"
+      },
+      {
+        "handle": "etheconomiczone",
+        "category": "uncategorised",
+        "note": "The Ethereum Economic Zone"
+      },
+      {
+        "handle": "ethereum",
+        "category": "uncategorised",
+        "note": "Ethereum"
+      },
+      {
+        "handle": "ethereumfndn",
+        "category": "uncategorised",
+        "note": "Ethereum Foundation"
+      },
+      {
+        "handle": "family",
+        "category": "uncategorised",
+        "note": "Family"
+      },
+      {
+        "handle": "Fetch_ai",
+        "category": "uncategorised",
+        "note": "Fetch.ai"
+      },
+      {
+        "handle": "gridplus",
+        "category": "uncategorised",
+        "note": "GridPlus"
+      },
+      {
+        "handle": "hanni_abu",
+        "category": "uncategorised",
+        "note": "hanniabu.eth (Ξ, α)"
+      },
+      {
+        "handle": "hebbianloop",
+        "category": "uncategorised",
+        "note": "S El Damaty"
+      },
+      {
+        "handle": "hesterbruikman",
+        "category": "uncategorised",
+        "note": "Hester"
+      },
+      {
+        "handle": "HesterPeirce",
+        "category": "uncategorised",
+        "note": "Hester Peirce"
+      },
+      {
+        "handle": "heyaura",
+        "category": "uncategorised",
+        "note": "heyAura"
+      },
+      {
+        "handle": "HouseofChimera",
+        "category": "uncategorised",
+        "note": "House of Chimera"
+      },
+      {
+        "handle": "imTokenOfficial",
+        "category": "uncategorised",
+        "note": "imToken"
+      },
+      {
+        "handle": "intangiblecoins",
+        "category": "uncategorised",
+        "note": "Alex Thorn"
+      },
+      {
+        "handle": "Ivshti",
+        "category": "uncategorised",
+        "note": "Ivo 7702/acc"
+      },
+      {
+        "handle": "jarrodwatts",
+        "category": "uncategorised",
+        "note": "Jarrod Watts"
+      },
+      {
+        "handle": "jpeg_yakuza",
+        "category": "uncategorised",
+        "note": "JPEG Yakuza"
+      },
+      {
+        "handle": "karpathy",
+        "category": "uncategorised",
+        "note": "Andrej Karpathy"
+      },
+      {
+        "handle": "kassandraETH",
+        "category": "uncategorised",
+        "note": "mrs kzg.eth née kassandra"
+      },
+      {
+        "handle": "kirbyongeo",
+        "category": "uncategorised",
+        "note": "kirbycrypto"
+      },
+      {
+        "handle": "labs_compass",
+        "category": "uncategorised",
+        "note": "Compass Labs"
+      },
+      {
+        "handle": "LewellenMichael",
+        "category": "uncategorised",
+        "note": "Michael Lewellen"
+      },
+      {
+        "handle": "LexSokolin",
+        "category": "uncategorised",
+        "note": "Lex Sokolin | Generative Ventures"
+      },
+      {
+        "handle": "marco_derossi",
+        "category": "uncategorised",
+        "note": "Marco De Rossi"
+      },
+      {
+        "handle": "MarinaMarkezic",
+        "category": "uncategorised",
+        "note": "Marina Markezic"
+      },
+      {
+        "handle": "mastarita_",
+        "category": "uncategorised",
+        "note": "Mattia A."
+      },
+      {
+        "handle": "MattBzh56",
+        "category": "uncategorised",
+        "note": "Mathieu Bertin"
+      },
+      {
+        "handle": "milesjennings",
+        "category": "uncategorised",
+        "note": "miles jennings"
+      },
+      {
+        "handle": "MorpheusAIs",
+        "category": "uncategorised",
+        "note": "Morpheus"
+      },
+      {
+        "handle": "Morpho",
+        "category": "uncategorised",
+        "note": "Morpho 🦋"
+      },
+      {
+        "handle": "mtpelerin",
+        "category": "uncategorised",
+        "note": "Mt Pelerin"
+      },
+      {
+        "handle": "MylesOneil",
+        "category": "uncategorised",
+        "note": "Myles O'Neil"
+      },
+      {
+        "handle": "nichanank",
+        "category": "uncategorised",
+        "note": "Nichanan Kesonpat"
+      },
+      {
+        "handle": "nookplot",
+        "category": "uncategorised",
+        "note": "nookplot"
+      },
+      {
+        "handle": "nufiwallet",
+        "category": "uncategorised",
+        "note": "NUFI Wallet"
+      },
+      {
+        "handle": "OndoFinance",
+        "category": "uncategorised",
+        "note": "Ondo Finance"
+      },
+      {
+        "handle": "OneKeyHQ",
+        "category": "uncategorised",
+        "note": "OneKey"
+      },
+      {
+        "handle": "OpenAgents",
+        "category": "uncategorised",
+        "note": "OpenAgents"
+      },
+      {
+        "handle": "openclaw",
+        "category": "uncategorised",
+        "note": "OpenClaw🦞"
+      },
+      {
+        "handle": "pedrouid",
+        "category": "uncategorised",
+        "note": "Pedro Gomes"
+      },
+      {
+        "handle": "phantom",
+        "category": "uncategorised",
+        "note": "Phantom"
+      },
+      {
+        "handle": "polymutex",
+        "category": "uncategorised",
+        "note": "polymutex 🌸"
+      },
+      {
+        "handle": "privy_io",
+        "category": "uncategorised",
+        "note": "Privy"
+      },
+      {
+        "handle": "questflow",
+        "category": "uncategorised",
+        "note": "Questflow"
+      },
+      {
+        "handle": "Rabby_io",
+        "category": "uncategorised",
+        "note": "Rabby Wallet"
+      },
+      {
+        "handle": "Railway_xyz",
+        "category": "uncategorised",
+        "note": "Railway Wallet"
+      },
+      {
+        "handle": "rainbowdotme",
+        "category": "uncategorised",
+        "note": "Rainbow"
+      },
+      {
+        "handle": "realMeld",
+        "category": "uncategorised",
+        "note": "Meld.io"
+      },
+      {
+        "handle": "riazb",
+        "category": "uncategorised",
+        "note": "Riaz Bordie"
+      },
+      {
+        "handle": "ritualnet",
+        "category": "uncategorised",
+        "note": "Ritual"
+      },
+      {
+        "handle": "SafeLabs_",
+        "category": "uncategorised",
+        "note": "Safe{Labs}"
+      },
+      {
+        "handle": "sandiforward",
+        "category": "uncategorised",
+        "note": "Sandiforward"
+      },
+      {
+        "handle": "serensandikci",
+        "category": "uncategorised",
+        "note": "seren"
+      },
+      {
+        "handle": "SkaleNetwork",
+        "category": "uncategorised",
+        "note": "SKALE"
+      },
+      {
+        "handle": "Snapcrackle",
+        "category": "uncategorised",
+        "note": "James | Snapcrackle"
+      },
+      {
+        "handle": "StateofAgents",
+        "category": "uncategorised",
+        "note": "State of Agents"
+      },
+      {
+        "handle": "supraEVM",
+        "category": "uncategorised",
+        "note": "Supra 𝔖"
+      },
+      {
+        "handle": "synthesis_md",
+        "category": "uncategorised",
+        "note": "synthesis"
+      },
+      {
+        "handle": "thoughtproof_ai",
+        "category": "uncategorised",
+        "note": "ThoughtProofAI"
+      },
+      {
+        "handle": "tkstanczak",
+        "category": "uncategorised",
+        "note": "Tomasz K. Stańczak"
+      },
+      {
+        "handle": "tom_martykan",
+        "category": "uncategorised",
+        "note": "Tomas Martykan"
+      },
+      {
+        "handle": "tomerweller",
+        "category": "uncategorised",
+        "note": "Tomer Weller"
+      },
+      {
+        "handle": "Trezor",
+        "category": "uncategorised",
+        "note": "Trezor"
+      },
+      {
+        "handle": "USDai_Official",
+        "category": "uncategorised",
+        "note": "USD.AI"
+      },
+      {
+        "handle": "virtuals_io",
+        "category": "uncategorised",
+        "note": "Virtuals Protocol"
+      },
+      {
+        "handle": "walletbeat",
+        "category": "uncategorised",
+        "note": "Walletbeat 🌸"
+      },
+      {
+        "handle": "zerion",
+        "category": "uncategorised",
+        "note": "Zerion"
+      },
+      {
+        "handle": "Zyfai_",
+        "category": "uncategorised",
+        "note": "Zyfai"
+      }
+    ]
+  },
+  "rss": {
+    "feeds": [
+      {
+        "name": "Flashbots MEV Newsletter",
+        "url": "https://collective.flashbots.net/tag/the-mev-letter.rss",
+        "max_items_per_run": 50,
+        "group": "research_outputs"
+      },
+      {
+        "name": "a16z crypto",
+        "url": "https://feeds.simplecast.com/XPOpH7r4",
+        "max_items_per_run": 5,
+        "group": "research_outputs"
+      },
+      {
+        "name": "Bankless",
+        "url": "https://www.bankless.com/feed",
+        "max_items_per_run": 5,
+        "tag": "newsletter",
+        "group": "newsletters"
+      },
+      {
+        "name": "CryptoSlate - DeFi",
+        "url": "https://cryptoslate.com/defi/feed",
+        "max_items_per_run": 5,
+        "tag": "newsletter",
+        "group": "newsletters"
+      },
+      {
+        "name": "Crypto.news - wallets",
+        "url": "https://crypto.news/tag/wallet/feed/",
+        "max_items_per_run": 5,
+        "tag": "newsletter",
+        "group": "newsletters"
+      },
+      {
+        "name": "The Block",
+        "url": "https://www.theblock.co/rss.xml",
+        "max_items_per_run": 5,
+        "tag": "newsletter",
+        "group": "newsletters"
+      },
+      {
+        "name": "CoinDesk",
+        "url": "https://www.coindesk.com/arc/outboundfeeds/rss",
+        "max_items_per_run": 5,
+        "tag": "newsletter",
+        "group": "newsletters"
+      },
+      {
+        "name": "The Defiant - Blockchains",
+        "url": "https://thedefiant.io/feed",
+        "max_items_per_run": 5,
+        "category_filter": "Blockchains",
+        "url_path_filter": "/blockchains/",
+        "tag": "newsletter",
+        "group": "newsletters"
+      },
+      {
+        "name": "Ethereum Blog",
+        "url": "https://blog.ethereum.org/en/feed.xml",
+        "max_items_per_run": 2,
+        "group": "core_protocol"
+      },
+      {
+        "name": "Vitalik Blog",
+        "url": "https://vitalik.eth.limo/feed.xml",
+        "max_items_per_run": 2,
+        "group": "core_protocol"
+      },
+      {
+        "name": "Stripe",
+        "url": "https://stripe.com/blog/feed.rss",
+        "max_items_per_run": 2,
+        "group": "company_blogs"
+      },
+      {
+        "name": "Delta Network",
+        "url": "https://blog.delta.network/rss",
+        "max_items_per_run": 2,
+        "group": "company_blogs"
+      },
+      {
+        "name": "ethresear.ch - Account Abstraction",
+        "url": "https://ethresear.ch/tag/account-abstraction.rss",
+        "max_items_per_run": 10,
+        "group": "forums"
+      },
+      {
+        "name": "Ethereum Magicians",
+        "url": "https://ethereum-magicians.org/latest.rss",
+        "max_items_per_run": 5,
+        "group": "forums"
+      }
+    ]
+  },
+  "github": {
+    "release_watch": [
+      {
+        "owner": "ethereum",
+        "repo": "EIPs"
+      }
+    ],
+    "eip_repo": {
+      "owner": "ethereum",
+      "repo": "EIPs",
+      "watch_paths": [
+        "EIPS/"
+      ],
+      "watch_events": [
+        "new_files",
+        "status_changes"
+      ]
+    }
+  },
+  "arxiv": {
+    "base_url": "https://export.arxiv.org/rss",
+    "categories": [
+      "cs.CR",
+      "cs.DC",
+      "cs.MA",
+      "cs.GT"
+    ],
+    "keyword_filter": [
+      "account abstraction",
+      "smart account",
+      "smart wallet",
+      "agent payment",
+      "machine-to-machine payment",
+      "MPC wallet",
+      "threshold signature",
+      "session key",
+      "passkey",
+      "delegated execution",
+      "agent delegation",
+      "verifiable credential",
+      "attestation",
+      "agent identity",
+      "intent-based",
+      "solver network",
+      "MEV",
+      "block building"
+    ]
+  },
+  "telegram": {
+    "python_bin": "~/.local/share/scout/telegram-venv/bin/python",
+    "session_path": "~/.local/share/scout/telegram",
+    "channels": [
+      {
+        "group": "ERC8004",
+        "note": "ERC-8004 discussion"
+      },
+      {
+        "group": "erc8183",
+        "note": "ERC-8183 discussion"
+      }
+    ],
+    "max_items_per_run": 25
+  }
+}

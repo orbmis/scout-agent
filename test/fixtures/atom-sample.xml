@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Sample Atom</title>
+  <entry>
+    <title>Session keys and delegation for agent wallets</title>
+    <link href="https://ethresear.ch/t/session-keys-delegation/1234"/>
+    <summary>Discussion of ERC-7710 delegation and session key patterns for agent wallets.</summary>
+    <published>2026-06-01T10:00:00Z</published>
+  </entry>
+</feed>
