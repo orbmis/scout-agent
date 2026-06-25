@@ -2,10 +2,10 @@
 
 import { getJson } from "../lib/http.mjs";
 
-export async function collect({ windowHours, sources, secrets, filters, metadata, http = { getJson } }) {
+export async function collect({ windowHours, sources, secrets, filters, metadata, nowMs = Date.now(), http = { getJson } }) {
   const cfg = sources.github || {};
   const diag = { repos_polled: 0, releases: 0, eip_changes: 0 };
-  const cutoff = Math.floor(Date.now() / 1000) - windowHours * 3600;
+  const cutoff = Math.floor(nowMs / 1000) - windowHours * 3600;
   const cutoffIso = new Date(cutoff * 1000).toISOString().replace(/\.\d+Z$/, "Z");
   const items = [];
 

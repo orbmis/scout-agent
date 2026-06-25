@@ -10,14 +10,18 @@ CLI. **The code is canonical** — do not re-derive scoring, tiering, or dedup b
 hand in-model; run the engine and read its output.
 
 ```bash
-scout diagnose                 # preflight: config, credentials, connectivity
+scout diagnose                 # fast preflight: config, credentials, connectivity
+scout doctor                   # deep per-source diagnosis with remediations
 scout run                      # collect (or reuse today's manifest) then process
 scout collect                  # collection only → manifest + marker
 scout process <manifest.json>  # editorial only → daily + filtered files
+scout selftest                 # offline golden proof of the editorial pipeline
 ```
 
-Each command prints a JSON summary to stdout. Relay that; don't paraphrase files
-you haven't read.
+Each command prints a JSON summary to stdout and exits non-zero on failure;
+`collect`/`run` also write `$SCOUT_STATE_DIR/last-run.json`. Relay the summary;
+don't paraphrase files you haven't read. When changing editorial behaviour, run
+`npm test` and regenerate the golden with `SCOUT_SELFTEST_UPDATE=1 scout selftest`.
 
 ## What changes behaviour
 

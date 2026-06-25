@@ -3,7 +3,7 @@
 
 import { getJson } from "../lib/http.mjs";
 
-export async function collect({ windowHours, sources, secrets, filters, metadata, http = { getJson } }) {
+export async function collect({ windowHours, sources, secrets, filters, metadata, nowMs = Date.now(), http = { getJson } }) {
   const cfg = sources.x || {};
   const diag = { tweets_returned: 0, kept: 0, dropped_timewindow: 0, dropped_filters: 0, status: "ok" };
 
@@ -39,8 +39,8 @@ export async function collect({ windowHours, sources, secrets, filters, metadata
   const tweets = body.data || [];
   diag.tweets_returned = tweets.length;
 
-  const cutoff = Math.floor(Date.now() / 1000) - windowHours * 3600;
-  const now = Math.floor(Date.now() / 1000);
+  const cutoff = Math.floor(nowMs / 1000) - windowHours * 3600;
+  const now = Math.floor(nowMs / 1000);
   const items = [];
 
   for (const tweet of tweets) {

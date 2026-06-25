@@ -4,9 +4,12 @@
 import fs from "node:fs";
 import path from "node:path";
 
-export function buildState({ stateDir, seenWindowDays = 14 }) {
+// nowMs is the injectable logical clock (epoch ms). Defaults to the real clock;
+// tests pass a fixed value for deterministic window/prune behaviour.
+export function buildState({ stateDir, seenWindowDays = 14, nowMs = Date.now() }) {
   const seenUrlsFile = path.join(stateDir, "seen-urls.tsv");
   const tier3AuthorsFile = path.join(stateDir, "tier3-authors.jsonl");
+  const nowSec = Math.floor(nowMs / 1000);
 
   function init() {
     fs.mkdirSync(stateDir, { recursive: true });
@@ -15,7 +18,7 @@ export function buildState({ stateDir, seenWindowDays = 14 }) {
   }
 
   function cutoff() {
-    return Math.floor(Date.now() / 1000) - seenWindowDays * 86400;
+    return nowSec - seenWindowDays * 86400;
   }
 
   // Returns a Set of URLs seen within the window, and rewrites the file pruned.
@@ -49,7 +52,7 @@ export function buildState({ stateDir, seenWindowDays = 14 }) {
 
   function markUrls(items) {
     init();
-    const ts = Math.floor(Date.now() / 1000);
+    const ts = nowSec;
     const lines = items
       .map((it) => it.url)
       .filter(Boolean)
