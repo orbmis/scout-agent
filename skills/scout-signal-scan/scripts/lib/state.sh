@@ -97,6 +97,51 @@ state_filter_new_items_no_mark() {
   echo "$kept"
 }
 
+state_partition_items_no_mark() {
+  # Reads JSON array from stdin and returns an object with kept and deduped arrays.
+  # Does not mutate the seen state; callers can commit after successful downstream writes.
+  state_init
+  state_prune_seen_urls
+
+  local input
+  input=$(cat)
+  local count
+  count=$(echo "$input" | jq 'length')
+  local kept_file deduped_file
+  kept_file=$(mktemp)
+  deduped_file=$(mktemp)
+  trap 'rm -f "$kept_file" "$deduped_file"' RETURN
+  for ((i=0; i<count; i++)); do
+    local item url
+    item=$(echo "$input" | jq -c ".[$i]")
+    url=$(echo "$item" | jq -r '.url // empty')
+    if [[ -z "$url" ]]; then
+      printf '%s\n' "$item" >> "$kept_file"
+      continue
+    fi
+    if state_seen_url "$url"; then
+      printf '%s\n' "$item" >> "$deduped_file"
+      continue
+    fi
+    printf '%s\n' "$item" >> "$kept_file"
+  done
+
+  local kept_json deduped_json
+  if [[ -s "$kept_file" ]]; then
+    kept_json=$(jq -s '.' "$kept_file")
+  else
+    kept_json='[]'
+  fi
+
+  if [[ -s "$deduped_file" ]]; then
+    deduped_json=$(jq -s '.' "$deduped_file")
+  else
+    deduped_json='[]'
+  fi
+
+  printf '{"kept":%s,"deduped":%s}\n' "$kept_json" "$deduped_json"
+}
+
 state_mark_urls_from_items() {
   # Reads JSON array from stdin and records each non-empty .url as seen.
   state_init

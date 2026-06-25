@@ -109,7 +109,9 @@ fi
 MERGED=$(jq -s 'add' "$TMP/seed.json" "$TMP/rss.json" "$TMP/github.json" "$TMP/arxiv.json" "$TELEGRAM_JSON")
 
 # Apply state-based URL dedup without mutating state until the manifest is safely written
-NEW_ITEMS=$(echo "$MERGED" | state_filter_new_items_no_mark)
+DEDUP_PARTITION=$(echo "$MERGED" | state_partition_items_no_mark)
+NEW_ITEMS=$(echo "$DEDUP_PARTITION" | jq '.kept')
+DEDUPED_ITEMS=$(echo "$DEDUP_PARTITION" | jq '.deduped')
 
 # Build collection diagnostics
 SEED_COUNT=$(jq 'length' "$TMP/seed.json")
@@ -136,9 +138,11 @@ DIAGNOSTICS=$(jq -nc \
     dedup:     { total_before: $before, total_after: $after }
   }')
 
-# Build the manifest
-PREV_FILES=$(find "$SIGNALS_DIR" -name "????-??-??.md" -type f -mtime -14 2>/dev/null | sort | jq -R . | jq -sc .)
+# Build the manifest. Exclude today's signal file so same-day reprocessing
+# does not dedup against the note it is about to rewrite.
+PREV_FILES=$(find "$SIGNALS_DIR" -name "????-??-??.md" -type f -mtime -14 ! -name "$DATE_UTC.md" 2>/dev/null | sort | jq -R . | jq -sc .)
 printf '%s\n' "$NEW_ITEMS" > "$TMP/new-items.json"
+printf '%s\n' "$DEDUPED_ITEMS" > "$TMP/deduped-items.json"
 printf '%s\n' "$DIAGNOSTICS" > "$TMP/diagnostics.json"
 printf '%s\n' "$PREV_FILES" > "$TMP/prev-files.json"
 
@@ -157,10 +161,11 @@ jq -n \
   --argjson weekly_report_due "$WEEKLY_FLAG" \
   --arg signals_dir "$SIGNALS_DIR" \
   --slurpfile new_items "$TMP/new-items.json" \
+  --slurpfile deduped_items "$TMP/deduped-items.json" \
   --slurpfile diagnostics "$TMP/diagnostics.json" \
   --slurpfile prev_files "$TMP/prev-files.json" \
   '{
-    schema_version: "1.1",
+    schema_version: "1.2",
     captured_at: $captured_at,
     date_utc: $date_utc,
     window_hours: {
@@ -173,6 +178,9 @@ jq -n \
     previous_signals_files: $prev_files[0],
     weekly_report_due: $weekly_report_due,
     collection_diagnostics: $diagnostics[0],
+    collection_filtered: {
+      url_dedup: $deduped_items[0]
+    },
     items: $new_items[0]
   }' > "$MANIFEST_FILE"
 

@@ -24,6 +24,9 @@ const dailyPath = path.join(signalsDir, `${signalDate}.md`);
 const filteredPath = path.join(signalsDir, `${signalDate}_filtered.md`);
 const risingAuthorsPath = path.join(signalsDir, `rising-authors-${signalDate}.md`);
 const markerPath = `/tmp/scout/ready-${signalDate}.marker`;
+const collectionDeduped = Array.isArray(manifest.collection_filtered?.url_dedup)
+  ? manifest.collection_filtered.url_dedup
+  : [];
 
 fs.mkdirSync(signalsDir, { recursive: true });
 fs.mkdirSync(stateDir, { recursive: true });
@@ -915,14 +918,34 @@ for (const klass of ["below_threshold", "missing_anchor_signal", "topic_dedup", 
   }
 }
 
+filteredLines.push("## Collection-stage URL dedup");
+filteredLines.push("");
+if (!collectionDeduped.length) {
+  filteredLines.push("No items.");
+  filteredLines.push("");
+} else {
+  for (const item of collectionDeduped) {
+    filteredLines.push(`### ${titleFor(item)}`);
+    filteredLines.push(`- **Source:** ${item.source} / ${item.subsource || "n/a"}`);
+    filteredLines.push(`- **Author:** ${item.author?.handle ? "@" + item.author.handle : item.author?.display_name || "Unknown"}`);
+    filteredLines.push(`- **Link:** ${item.url}`);
+    if (item.created_at) filteredLines.push(`- **Captured timestamp:** ${item.created_at}`);
+    filteredLines.push("- **Exclusion class:** collection_url_dedup");
+    filteredLines.push("- **Reason:** URL already appeared in the rolling 14-day seen store before processor-time scoring.");
+    filteredLines.push("");
+  }
+}
+
 filteredLines.push("## Filter diagnostics summary");
 filteredLines.push("");
+const totalFilteredCount = filtered.length + collectionDeduped.length;
 filteredLines.push(`- **Kept:** ${kept.length}`);
-filteredLines.push(`- **Filtered:** ${filtered.length}`);
+filteredLines.push(`- **Filtered:** ${totalFilteredCount}`);
 filteredLines.push(`- **Threshold failures:** ${filtered.filter((entry) => entry.exclusionClass === "below_threshold").length}`);
 filteredLines.push(`- **Missing anchor signal:** ${filtered.filter((entry) => entry.exclusionClass === "missing_anchor_signal").length}`);
 filteredLines.push(`- **Topic dedup:** ${filtered.filter((entry) => entry.exclusionClass === "topic_dedup").length}`);
 filteredLines.push(`- **Collapsed to cluster:** ${filtered.filter((entry) => entry.exclusionClass === "collapsed_to_cluster").length}`);
+filteredLines.push(`- **Collection-stage URL dedup:** ${collectionDeduped.length}`);
 filteredLines.push("");
 
 fs.writeFileSync(dailyPath, dailyLines.join("\n"));
@@ -967,7 +990,7 @@ const output = {
   risingWritten,
   risingAuthorsPath,
   keptCount: kept.length,
-  filteredCount: filtered.length,
+  filteredCount: totalFilteredCount,
   strongest: kept.slice(0, 4).map((entry) => ({
     title: titleFor(entry.item),
     url: entry.item.url,

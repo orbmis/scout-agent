@@ -6,7 +6,7 @@ The manifest is the contract between this skill and the Scout agent. The skill c
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "1.2",
   "captured_at": "2026-05-16T08:00:12Z",
   "date_utc": "2026-05-16",
   "window_hours": { "social": 24 },
@@ -17,6 +17,9 @@ The manifest is the contract between this skill and the Scout agent. The skill c
   ],
   "weekly_report_due": false,
   "collection_diagnostics": { "...": "..." },
+  "collection_filtered": {
+    "url_dedup": [ "..." ]
+  },
   "items": [ "..." ]
 }
 ```
@@ -24,6 +27,7 @@ The manifest is the contract between this skill and the Scout agent. The skill c
 - **schema_version** — bump when fields change incompatibly
 - **previous_signals_files** — last 14 days of dated files for the agent's topic-level dedup
 - **weekly_report_due** — true on Sundays; the agent should also write the rising-authors report
+- **collection_filtered.url_dedup** — raw items removed by the collector's rolling 14-day URL dedup, preserved for audit output
 
 ## Item shape
 
@@ -105,6 +109,7 @@ The agent should surface diagnostic context in the daily signal file's empty-tie
 
 1. **The skill never scores, tiers, or interprets.** Every `metadata` field is an observable presence/absence check.
 2. **The skill applies hard negative filters at collection time.** Items violating ticker patterns, or pump-phrase patterns never appear in the manifest.
-3. **The skill applies URL dedup against a rolling 14-day window.** Items already seen do not appear.
+3. **The skill applies URL dedup against a rolling 14-day window.** Items already seen do not appear in the items array.
+   They are recorded under collection_filtered.url_dedup for auditability.
 4. **The skill does not apply topic-level dedup.** That requires reading prior Signals files, which is the agent's job.
 5. **Manifest fields are stable.** Adding new fields is a minor version bump (1.1); changing or removing fields is a major bump.
