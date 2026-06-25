@@ -1,0 +1,20 @@
+{
+  "name": "scout-agent",
+  "version": "2.0.0",
+  "description": "Scout — a signal-monitoring agent for agentic payments, account abstraction, and adjacent infrastructure.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "scout": "bin/scout.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "collect": "node bin/scout.mjs collect",
+    "process": "node bin/scout.mjs process",
+    "run": "node bin/scout.mjs run",
+    "diagnose": "node bin/scout.mjs diagnose",
+    "test": "node --test"
+  }
+}

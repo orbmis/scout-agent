@@ -1,0 +1,26 @@
+{
+  "data": [
+    {
+      "id": "111",
+      "author_id": "a1",
+      "text": "New ERC-7702 delegation pattern for smart accounts — see https://t.co/abc",
+      "created_at": "2026-06-25T09:00:00.000Z",
+      "public_metrics": { "like_count": 40, "retweet_count": 12, "reply_count": 5, "quote_count": 4 },
+      "entities": { "urls": [{ "expanded_url": "https://eips.ethereum.org/EIPS/eip-7702" }] }
+    },
+    {
+      "id": "222",
+      "author_id": "a2",
+      "text": "gm frens, $DOGE to the moon 🚀🚀🚀",
+      "created_at": "2026-06-25T08:00:00.000Z",
+      "public_metrics": { "like_count": 1, "retweet_count": 0, "reply_count": 0, "quote_count": 0 },
+      "entities": { "urls": [] }
+    }
+  ],
+  "includes": {
+    "users": [
+      { "id": "a1", "username": "VitalikButerin", "name": "Vitalik", "created_at": "2012-01-01T00:00:00.000Z", "public_metrics": { "followers_count": 500000 }, "description": "ethereum" },
+      { "id": "a2", "username": "moonboy", "name": "Moon Boy", "created_at": "2026-06-01T00:00:00.000Z", "public_metrics": { "followers_count": 10 }, "description": "" }
+    ]
+  }
+}
