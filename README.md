@@ -1,7 +1,6 @@
 # Scout
 
 [![CI](https://github.com/orbmis/scout-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/orbmis/scout-agent/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/orbmis/scout-agent/actions/workflows/codeql.yml/badge.svg)](https://github.com/orbmis/scout-agent/actions/workflows/codeql.yml)
 ![Node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)
 ![runtime deps](https://img.shields.io/badge/runtime%20deps-0-blue)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4)](https://prettier.io)
@@ -178,7 +177,6 @@ refresh fixtures from live data, run any collector with
 **CI workflows:**
 
 - `ci.yml` — lint + format check + tests (coverage) + `selftest` on Node 18/20, every push and PR.
-- `codeql.yml` — CodeQL security/code scanning (push, PR, weekly).
 - `gitleaks.yml` — fails if a credential is committed.
 - `live-test.yml` — a **public-source live canary** when a maintainer comments
   `/live-test` on a PR: collects from RSS/GitHub/arxiv (no secrets), asserts the
