@@ -1,8 +1,10 @@
 name: gitleaks
 
+# Scan on push (covers every commit on every branch, including PR branches in this
+# repo). The pull_request event is intentionally omitted: gitleaks-action tries to
+# post PR comments there, which needs elevated permissions we don't want to grant.
 on:
   push:
-  pull_request:
 
 permissions:
   contents: read
