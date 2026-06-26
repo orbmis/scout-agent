@@ -5,6 +5,7 @@
 ![Node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)
 ![runtime deps](https://img.shields.io/badge/runtime%20deps-0-blue)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4)](https://prettier.io)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Scout is a daily **signal-monitoring agent**. It scans technical and editorial
 sources for substantive developments in agentic payments, account abstraction,

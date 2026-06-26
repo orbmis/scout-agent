@@ -2,6 +2,7 @@
   "name": "scout-agent",
   "version": "2.0.0",
   "description": "Scout — a signal-monitoring agent for agentic payments, account abstraction, and adjacent infrastructure.",
+  "license": "MIT",
   "type": "module",
   "private": true,
   "bin": {
