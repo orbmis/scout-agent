@@ -1,5 +1,11 @@
 # Scout
 
+[![CI](https://github.com/orbmis/scout-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/orbmis/scout-agent/actions/workflows/ci.yml)
+![Node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)
+![runtime deps](https://img.shields.io/badge/runtime%20deps-0-blue)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4)](https://prettier.io)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Scout is a daily **signal-monitoring agent**. It scans technical and editorial
 sources for substantive developments in agentic payments, account abstraction,
 agent wallets, and adjacent crypto infrastructure, then writes dated Markdown
@@ -21,7 +27,7 @@ Two decoupled halves joined by a JSON **manifest**:
                          │                          │
    ┌─────────────────────┴──────────────────────────┴───────────┐
    │  scout collect   (the mechanical half — no judgement)       │
-   │    x · rss · github · arxiv · telegram  →  merge  →  dedup  │
+   │       x · rss · github · arxiv  →  merge  →  dedup          │
    └─────────────────────────────┬──────────────────────────────┘
                                  │  manifest-YYYY-MM-DD.json  (+ ready-*.marker)
    ┌─────────────────────────────┴──────────────────────────────┐
@@ -38,9 +44,9 @@ Two decoupled halves joined by a JSON **manifest**:
 
 ```
 scout-agent/
-├── bin/scout.mjs            # the only entry point (collect | process | run | diagnose)
+├── bin/scout.mjs            # the only entry point (collect | process | run | diagnose | doctor | selftest)
 ├── config/
-│   ├── sources.json         # WHAT to collect: X List, seed authors, feeds, repos, arxiv, telegram
+│   ├── sources.json         # WHAT to collect: X List, seed authors, feeds, repos, arxiv
 │   └── editorial.json       # HOW to judge: tracked entities + negative filters
 ├── src/
 │   ├── config.mjs           # resolves all paths, windows, secrets, loaded config
@@ -48,35 +54,36 @@ scout-agent/
 │   ├── process.mjs          # editorial engine → daily + filtered files
 │   ├── diagnose.mjs         # preflight checks (config, creds, connectivity)
 │   ├── collectors/          # one module per source, identical interface
-│   │   ├── x.mjs  rss.mjs  github.mjs  arxiv.mjs  telegram.mjs
+│   │   ├── x.mjs  rss.mjs  github.mjs  arxiv.mjs
 │   ├── editorial/           # the deterministic editorial engine, split into units
 │   │   ├── score.mjs  cluster.mjs  flashbots.mjs  render.mjs
-│   ├── lib/                 # shared, injectable building blocks
-│   │   ├── http.mjs  feed.mjs  metadata.mjs  filters.mjs  state.mjs  text.mjs
-│   └── telegram_fetch.py    # the ONLY Python — a Telethon shim (MTProto needs it)
+│   └── lib/                 # shared, injectable building blocks
+│       ├── http.mjs  feed.mjs  metadata.mjs  filters.mjs  state.mjs  text.mjs
 ├── test/                    # node:test suite + fixtures (offline, no credentials)
 ├── SOUL.md  USER.md  AGENTS.md   # agent-facing identity / writing focus / operating notes
 └── SPEC.md                  # the editorial contract + manifest schema
 ```
 
-Everything except the Telegram shim is Node (ESM, stdlib only — no `npm install`).
+The pipeline is 100% Node (ESM, stdlib only — **zero runtime dependencies**).
 
 ## Dependencies
 
-- **Node ≥ 18** (uses global `fetch`, ESM, `node:test`). Nothing else for the
-  core pipeline — no third-party npm packages.
-- **Python 3 + Telethon** only if you enable the Telegram collector. A dedicated
-  venv and an authorized session are required (see [Telegram setup](#telegram-setup)).
+- **Node ≥ 18** for the pipeline (uses global `fetch`, ESM, `node:test`). No
+  third-party runtime packages.
+- **Dev-only** tooling for contributors: ESLint + Prettier (installed with
+  `npm install`; they ship nothing at runtime).
 
 ## Install
 
 ```bash
 git clone <this repo> && cd scout-agent
 node --version          # confirm >= 18
+npm install             # dev tooling only (ESLint/Prettier); the pipeline itself needs none
 npm test                # run the offline test suite
 ```
 
-There is no build step and no dependency install.
+The pipeline has no build step and no runtime dependencies; `npm install` only
+pulls the dev linters/formatters.
 
 ## Configure
 
@@ -87,8 +94,6 @@ Create `~/.config/social-scan/.env` (or point `SOCIAL_SCAN_ENV_FILE` elsewhere):
 ```sh
 X_BEARER_TOKEN=...      # required for the X collector (X Basic tier or pay-per-use)
 GITHUB_TOKEN=...        # recommended (raises GitHub rate limit 60→5000/hr)
-TELEGRAM_API_ID=...     # required only for Telegram (from my.telegram.org)
-TELEGRAM_API_HASH=...
 ```
 
 `scout` loads this file automatically; the host cron can also `source` it.
@@ -101,21 +106,20 @@ an explicit `status` in the diagnostics — the run still succeeds.
   `x.list_id`). Edit membership in the X app; no code change needed. The List
   must be public for bearer-token auth. `seed_authors` only maps handles to
   editorial categories.
-- **Feeds, repos, arxiv categories, telegram channels**: edit
-  `config/sources.json`.
+- **Feeds, repos, arxiv categories**: edit `config/sources.json`.
 - **Tracked entities and negative filters**: edit `config/editorial.json`.
   Patterns are JavaScript regex (not POSIX/grep).
 
 ### Environment overrides (all optional)
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `OPENCLAW_WORKSPACE` | repo root | workspace root (for `USER.md`) |
-| `SCOUT_SIGNALS_DIR` | `~/obsidian-vault/Signals` | where signal files are written |
-| `SCOUT_MANIFEST_DIR` | `/tmp/scout` | manifest + marker location |
-| `SCOUT_STATE_DIR` | `~/.local/share/scout` | rolling URL/author state |
-| `SCOUT_SEEN_WINDOW_DAYS` | `14` | URL dedup window |
-| `SEED_HOURS` / `RSS_HOURS` / `GITHUB_HOURS` / `ARXIV_HOURS` / `TELEGRAM_HOURS` | 24 / 48 / 24 / 48 / 4 | per-collector lookback |
+| Variable                                                    | Default                    | Purpose                        |
+| ----------------------------------------------------------- | -------------------------- | ------------------------------ |
+| `OPENCLAW_WORKSPACE`                                        | repo root                  | workspace root (for `USER.md`) |
+| `SCOUT_SIGNALS_DIR`                                         | `~/obsidian-vault/Signals` | where signal files are written |
+| `SCOUT_MANIFEST_DIR`                                        | `/tmp/scout`               | manifest + marker location     |
+| `SCOUT_STATE_DIR`                                           | `~/.local/share/scout`     | rolling URL/author state       |
+| `SCOUT_SEEN_WINDOW_DAYS`                                    | `14`                       | URL dedup window               |
+| `SEED_HOURS` / `RSS_HOURS` / `GITHUB_HOURS` / `ARXIV_HOURS` | 24 / 48 / 24 / 48          | per-collector lookback         |
 
 ## Run
 
@@ -157,9 +161,11 @@ idempotent by design.
 ```bash
 npm test            # offline unit + collector + integration tests (no network, no creds)
 npm run test:coverage   # same, with a coverage report
+npm run lint        # ESLint
+npm run format      # Prettier --write (use format:check in CI)
 scout selftest      # one-command offline proof of the editorial pipeline (golden diff)
 scout diagnose      # live: bins, paths, credentials, source connectivity
-scout doctor        # live: per-feed reachability, GitHub rate limit, X List, telegram session
+scout doctor        # live: per-feed reachability, GitHub rate limit, X List visibility
 ```
 
 The suite stubs the HTTP layer (`src/lib/http.mjs`) so collectors and the
@@ -168,37 +174,26 @@ refresh fixtures from live data, run any collector with
 `SCOUT_HTTP_MODE=record SCOUT_HTTP_FIXTURES=<dir>`, then replay with
 `SCOUT_HTTP_MODE=replay`.
 
-**CI:** `.github/workflows/ci.yml` runs the suite + `selftest` on Node 18/20 for
-every push and PR. `.github/workflows/live-test.yml` runs a **public-source live
-canary** when a maintainer comments `/live-test` on a PR — it collects from
-RSS/GitHub/arxiv (no secrets), asserts the run report, and posts the result back
-as a comment. Editing the golden manifest? regenerate with
-`SCOUT_SELFTEST_UPDATE=1 scout selftest`.
+**CI workflows:**
 
-## Telegram setup
+- `ci.yml` — lint + format check + tests (coverage) + `selftest` on Node 18/20, every push and PR.
+- `gitleaks.yml` — fails if a credential is committed.
+- `live-test.yml` — a **public-source live canary** when a maintainer comments
+  `/live-test` on a PR: collects from RSS/GitHub/arxiv (no secrets), asserts the
+  run report, posts the result as a comment.
+- `dependabot.yml` — weekly update PRs for the dev tooling and the GitHub Actions.
 
-The Telegram collector shells out to `src/telegram_fetch.py` (Telethon). One-time:
-
-```bash
-python3 -m venv ~/.local/share/scout/telegram-venv
-~/.local/share/scout/telegram-venv/bin/pip install telethon python-dotenv
-# authorize once (interactive), writing a session to ~/.local/share/scout/telegram.session
-```
-
-Set `telegram.python_bin`, `telegram.session_path`, and `channels` in
-`config/sources.json`. The shim never prompts interactively (safe for cron): if
-the session is unauthorized it returns nothing and the run continues.
+Editing the golden manifest? regenerate with `SCOUT_SELFTEST_UPDATE=1 scout selftest`.
 
 ## Troubleshooting
 
-| Symptom | First check |
-|---|---|
-| A collector returns 0 | `scout diagnose` — credential or connectivity for that source |
-| `x_seed` status `no_token` | `X_BEARER_TOKEN` missing from `~/.config/social-scan/.env` |
-| `x` returns 403 | the X List is private, or the token is wrong |
-| `telegram` status `venv_missing`/`session_missing` | see [Telegram setup](#telegram-setup) |
-| arxiv empty on Sat/Sun | expected — arxiv doesn't publish weekends |
-| Signal file empty | inspect `manifest.collection_diagnostics`; see which collectors returned zero |
-| Output looks wrong after a config change | `npm test`, then re-run on a saved manifest with `scout process` |
+| Symptom                                  | First check                                                                   |
+| ---------------------------------------- | ----------------------------------------------------------------------------- |
+| A collector returns 0                    | `scout diagnose` — credential or connectivity for that source                 |
+| `x_seed` status `no_token`               | `X_BEARER_TOKEN` missing from `~/.config/social-scan/.env`                    |
+| `x` returns 403                          | the X List is private, or the token is wrong                                  |
+| arxiv empty on Sat/Sun                   | expected — arxiv doesn't publish weekends                                     |
+| Signal file empty                        | inspect `manifest.collection_diagnostics`; see which collectors returned zero |
+| Output looks wrong after a config change | `npm test`, then re-run on a saved manifest with `scout process`              |
 
 See [`SPEC.md`](SPEC.md) for the manifest schema and the exact scoring/tiering rules.

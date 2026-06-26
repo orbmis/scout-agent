@@ -19,7 +19,9 @@ const metadata = buildMetadata(editorial.tracked);
 const filters = buildFilters(editorial.negative);
 
 test("rss collector keeps on-topic item, drops pump item", async () => {
-  const sources = { rss: { feeds: [{ name: "Ethereum Blog", url: "http://x", group: "core_protocol", max_items_per_run: 10 }] } };
+  const sources = {
+    rss: { feeds: [{ name: "Ethereum Blog", url: "http://x", group: "core_protocol", max_items_per_run: 10 }] },
+  };
   const http = { getText: async () => ({ ok: true, text: fixture("rss-sample.xml") }) };
   const { items, diag } = await collectRss({ windowHours: 100000, sources, filters, metadata, http });
   assert.equal(diag.successful, 1);
@@ -30,7 +32,9 @@ test("rss collector keeps on-topic item, drops pump item", async () => {
 });
 
 test("x collector maps seed category and filters pump tweets", async () => {
-  const sources = { x: { list_id: "123", max_results: 100, seed_authors: [{ handle: "VitalikButerin", category: "aa_standards" }] } };
+  const sources = {
+    x: { list_id: "123", max_results: 100, seed_authors: [{ handle: "VitalikButerin", category: "aa_standards" }] },
+  };
   const secrets = { X_BEARER_TOKEN: "test" };
   const http = { getJson: async () => ({ json: JSON.parse(fixture("x-list-response.json")) }) };
   const { items, diag } = await collectX({ windowHours: 100000, sources, secrets, filters, metadata, http });
@@ -42,7 +46,14 @@ test("x collector maps seed category and filters pump tweets", async () => {
 });
 
 test("x collector returns empty with explicit status when no token", async () => {
-  const { items, diag } = await collectX({ windowHours: 24, sources: { x: { list_id: "123" } }, secrets: {}, filters, metadata, http: {} });
+  const { items, diag } = await collectX({
+    windowHours: 24,
+    sources: { x: { list_id: "123" } },
+    secrets: {},
+    filters,
+    metadata,
+    http: {},
+  });
   assert.equal(items.length, 0);
   assert.equal(diag.status, "no_token");
 });

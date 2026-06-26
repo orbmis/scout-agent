@@ -29,7 +29,15 @@ test("collect orchestrates offline, writes a valid manifest, sets the weekly fla
   assert.equal(report.dedup.total_before, 0);
   assert.ok(report.warnings.some((w) => w.code === "zero_items_all_sources"));
 
-  for (const k of ["SCOUT_HTTP_MODE", "SCOUT_HTTP_FIXTURES", "SCOUT_SIGNALS_DIR", "SCOUT_MANIFEST_DIR", "SCOUT_STATE_DIR", "SCOUT_NOW"]) delete process.env[k];
+  for (const k of [
+    "SCOUT_HTTP_MODE",
+    "SCOUT_HTTP_FIXTURES",
+    "SCOUT_SIGNALS_DIR",
+    "SCOUT_MANIFEST_DIR",
+    "SCOUT_STATE_DIR",
+    "SCOUT_NOW",
+  ])
+    delete process.env[k];
 });
 
 test("selftest reproduces the committed golden editorial output", async () => {
@@ -59,5 +67,6 @@ test("diagnose and doctor return structured, deterministic results offline", asy
   assert.ok(Array.isArray(doc.checks));
   assert.ok(doc.checks.find((c) => c.name === "config"));
 
-  for (const k of ["SCOUT_HTTP_MODE", "SCOUT_HTTP_FIXTURES", "SCOUT_STATE_DIR", "SCOUT_MANIFEST_DIR"]) delete process.env[k];
+  for (const k of ["SCOUT_HTTP_MODE", "SCOUT_HTTP_FIXTURES", "SCOUT_STATE_DIR", "SCOUT_MANIFEST_DIR"])
+    delete process.env[k];
 });

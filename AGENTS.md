@@ -26,7 +26,7 @@ don't paraphrase files you haven't read. When changing editorial behaviour, run
 ## What changes behaviour
 
 - **What is collected:** `config/sources.json` (X List id, seed authors, feeds,
-  repos, arxiv categories, telegram channels). X membership is edited in the X
+  repos, arxiv categories). X membership is edited in the X
   app, not here.
 - **What counts as substantive:** `config/editorial.json` (tracked entities,
   negative filters).

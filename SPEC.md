@@ -28,7 +28,7 @@ editorial engine (`scout process`). Written to
 
 ```jsonc
 {
-  "source": "x-seed" | "rss" | "github" | "arxiv" | "telegram",
+  "source": "x-seed" | "rss" | "github" | "arxiv",
   "subsource": "@handle" | "Feed Name" | "owner/repo" | "arxiv:cs.CR",
   "group": "research_outputs|newsletters|core_protocol|company_blogs|forums", // rss only
   "tag": "newsletter",                                  // rss only, optional
@@ -104,7 +104,7 @@ Each item gets a composite score across four axes, plus a topical gate.
 
 **Topical gate:** an item must reach `topical ≥ 2` **and** clear a source
 threshold (`4` for github/rss, `5` otherwise), **and** carry at least one
-*required anchor signal* — one of: github/arxiv source; RSS from a primary group;
+_required anchor signal_ — one of: github/arxiv source; RSS from a primary group;
 non-empty `anchor_domain_links`; `seed_engaged_by`; `is_seed_author`; or ≥2 strong
 content-specificity flags. Items satisfying none never surface, regardless of score.
 
@@ -112,12 +112,12 @@ Each item is labelled `weak | moderate | strong` with a dominant axis.
 
 ## Tiers (`src/editorial/cluster.mjs → assignTier`)
 
-| Tier | Meaning | Rule |
-|---|---|---|
-| **0 — Primary Source** | read first | RSS from research/core/forums/company groups or any newsletter; all github & arxiv |
-| **1 — Seed-Set Signal** | "what people I trust say" | `author.is_seed_author` |
-| **2 — Seed-Adjacent** | "what they're paying attention to" | `engagement.seed_engaged_by` non-empty |
-| **3 — Independent** | "who don't I know yet" | everything else that clears threshold; feeds rising-authors |
+| Tier                    | Meaning                            | Rule                                                                               |
+| ----------------------- | ---------------------------------- | ---------------------------------------------------------------------------------- |
+| **0 — Primary Source**  | read first                         | RSS from research/core/forums/company groups or any newsletter; all github & arxiv |
+| **1 — Seed-Set Signal** | "what people I trust say"          | `author.is_seed_author`                                                            |
+| **2 — Seed-Adjacent**   | "what they're paying attention to" | `engagement.seed_engaged_by` non-empty                                             |
+| **3 — Independent**     | "who don't I know yet"             | everything else that clears threshold; feeds rising-authors                        |
 
 ## Dedup
 
@@ -137,7 +137,7 @@ Written to `signals_dir` every run:
 - **`YYYY-MM-DD.md`** — the daily file: tiered entries (source, author, link,
   engagement, summary, why-it-matters, score, dominant axis, optional
   "Connects to …" annotation), then collection diagnostics, then an editorial note.
-  Empty tiers state *why* using the diagnostics, never a bare "no items".
+  Empty tiers state _why_ using the diagnostics, never a bare "no items".
 - **`YYYY-MM-DD_filtered.md`** — every excluded item with its exclusion class
   (`below_threshold`, `missing_anchor_signal`, `topic_dedup`,
   `collapsed_to_cluster`), reason, and scoring note. For auditing/tuning.
@@ -148,10 +148,10 @@ weekly rising-authors workflow.
 
 ## State files
 
-| File | Owner | Purpose |
-|---|---|---|
-| `seen-urls.tsv` | `collect` | `ts⇥url`, rolling 14-day URL dedup, pruned each run |
-| `tier3-authors.jsonl` | `process` | append-only log of Tier-3 appearances |
+| File                  | Owner     | Purpose                                             |
+| --------------------- | --------- | --------------------------------------------------- |
+| `seen-urls.tsv`       | `collect` | `ts⇥url`, rolling 14-day URL dedup, pruned each run |
+| `tier3-authors.jsonl` | `process` | append-only log of Tier-3 appearances               |
 
 ## Tracked scope (config/editorial.json)
 

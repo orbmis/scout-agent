@@ -37,4 +37,3 @@ Apply this annotation conservatively. Items that don't materially connect should
 ## Maintenance
 
 This file should be reviewed monthly. Writing focus shifts as essays publish and new themes emerge. Active hypotheses should be edited as evidence accumulates for or against them. The companies and protocols list should be pruned and extended as the landscape moves.
-

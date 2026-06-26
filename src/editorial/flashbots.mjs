@@ -86,7 +86,12 @@ function chooseLink(section, itemHtml) {
       const label = anchor.label.toLowerCase();
       let score = 0;
       if (/x\.com\/[^/]+\/status\//.test(href)) score += 8;
-      if (/arxiv\.org|ethresear\.ch|eips\.ethereum\.org|github\.com|youtube\.com|youtu\.be|notes\.ethereum\.org|ethereum\.foundation|forum\.arbitrum\.foundation|ethpandaops\.io|ecdsa\.fail|fastconfirm\.it|etherworld\.co|vitalik\.eth\.limo/.test(href)) score += 5;
+      if (
+        /arxiv\.org|ethresear\.ch|eips\.ethereum\.org|github\.com|youtube\.com|youtu\.be|notes\.ethereum\.org|ethereum\.foundation|forum\.arbitrum\.foundation|ethpandaops\.io|ecdsa\.fail|fastconfirm\.it|etherworld\.co|vitalik\.eth\.limo/.test(
+          href
+        )
+      )
+        score += 5;
       if (/collective\.flashbots\.net\/u\//.test(href)) score -= 6;
       if (/x\.com\/[^/]+\/?$/.test(href)) score -= 5;
       if (/^https?:\/\/[^/]+\/?$/.test(href)) score -= 4;

@@ -11,7 +11,6 @@
     "rss": { "items_kept": 1 },
     "github": { "items_kept": 1 },
     "arxiv": { "items_kept": 1 },
-    "telegram": { "status": "no_channels", "items_kept": 0 },
     "dedup": { "total_before": 5, "total_after": 5 }
   },
   "items": [
