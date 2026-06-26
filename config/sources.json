@@ -1,5 +1,5 @@
 {
-  "_comment": "Single source-of-truth for what Scout collects. Edit X coverage via the X List in the app (list_id below); edit feeds/repos/arxiv/telegram here.",
+  "_comment": "Single source-of-truth for what Scout collects. Edit X coverage via the X List in the app (list_id below); edit feeds/repos/arxiv here.",
   "x": {
     "list_id": "2056288007821357186",
     "list_url": "https://x.com/i/lists/2056288007821357186",
@@ -668,23 +668,13 @@
     "eip_repo": {
       "owner": "ethereum",
       "repo": "EIPs",
-      "watch_paths": [
-        "EIPS/"
-      ],
-      "watch_events": [
-        "new_files",
-        "status_changes"
-      ]
+      "watch_paths": ["EIPS/"],
+      "watch_events": ["new_files", "status_changes"]
     }
   },
   "arxiv": {
     "base_url": "https://export.arxiv.org/rss",
-    "categories": [
-      "cs.CR",
-      "cs.DC",
-      "cs.MA",
-      "cs.GT"
-    ],
+    "categories": ["cs.CR", "cs.DC", "cs.MA", "cs.GT"],
     "keyword_filter": [
       "account abstraction",
       "smart account",
@@ -705,20 +695,5 @@
       "MEV",
       "block building"
     ]
-  },
-  "telegram": {
-    "python_bin": "~/.local/share/scout/telegram-venv/bin/python",
-    "session_path": "~/.local/share/scout/telegram",
-    "channels": [
-      {
-        "group": "ERC8004",
-        "note": "ERC-8004 discussion"
-      },
-      {
-        "group": "erc8183",
-        "note": "ERC-8183 discussion"
-      }
-    ],
-    "max_items_per_run": 25
   }
 }

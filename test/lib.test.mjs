@@ -11,9 +11,15 @@ import { buildCollectReport, canaryVerdict } from "../src/report.mjs";
 import { buildState } from "../src/lib/state.mjs";
 
 const validManifest = {
-  schema_version: "1.1", captured_at: "2026-06-25T08:00:00Z", date_utc: "2026-06-25",
-  window_hours: {}, signals_dir: "/x", previous_signals_files: [], weekly_report_due: false,
-  collection_diagnostics: {}, items: [{ source: "rss", url: "https://x", metadata: { eip_numbers: [], has_eip_reference: false } }],
+  schema_version: "1.1",
+  captured_at: "2026-06-25T08:00:00Z",
+  date_utc: "2026-06-25",
+  window_hours: {},
+  signals_dir: "/x",
+  previous_signals_files: [],
+  weekly_report_due: false,
+  collection_diagnostics: {},
+  items: [{ source: "rss", url: "https://x", metadata: { eip_numbers: [], has_eip_reference: false } }],
 };
 
 test("validateManifest accepts a well-formed manifest", () => {
@@ -35,9 +41,15 @@ test("buildCollectReport flags errored collectors and the canary verdict", () =>
     rss: { items: [{}, {}], diag: {} },
     github: { items: [{}], diag: {} },
     arxiv: { items: [], diag: { status: "error" } },
-    telegram: { items: [], diag: { status: "venv_missing" } },
   };
-  const report = buildCollectReport({ date: "2026-06-25", capturedAt: "t", byName, dedup: { total_before: 3, total_after: 3 }, collectMs: 1000, totalMs: 1200 });
+  const report = buildCollectReport({
+    date: "2026-06-25",
+    capturedAt: "t",
+    byName,
+    dedup: { total_before: 3, total_after: 3 },
+    collectMs: 1000,
+    totalMs: 1200,
+  });
   assert.equal(report.collectors.arxiv.status, "error");
   assert.ok(report.warnings.some((w) => w.code === "collector_error" && w.collector === "arxiv"));
   assert.equal(report.ok, true); // not every collector errored
@@ -57,7 +69,10 @@ test("HTTP replay serves recorded fixtures and reports misses", async () => {
   const crypto = await import("node:crypto");
   const url = "https://example.com/feed";
   const hash = crypto.createHash("sha1").update(url).digest("hex").slice(0, 16);
-  fs.writeFileSync(path.join(dir, `example.com-${hash}.json`), JSON.stringify({ ok: true, status: 200, text: "HELLO" }));
+  fs.writeFileSync(
+    path.join(dir, `example.com-${hash}.json`),
+    JSON.stringify({ ok: true, status: 200, text: "HELLO" })
+  );
 
   const hit = await getText(url);
   assert.equal(hit.ok, true);
@@ -77,7 +92,13 @@ test("state dedup window honours the injected clock", () => {
   const s0 = buildState({ stateDir: dir, seenWindowDays: 14, nowMs: t0 });
   s0.markUrls([{ url: "https://a" }]);
   // 5 days later: still within the 14-day window → seen.
-  assert.equal(buildState({ stateDir: dir, seenWindowDays: 14, nowMs: t0 + 5 * day }).filterNew([{ url: "https://a" }]).length, 0);
+  assert.equal(
+    buildState({ stateDir: dir, seenWindowDays: 14, nowMs: t0 + 5 * day }).filterNew([{ url: "https://a" }]).length,
+    0
+  );
   // 20 days later: pruned → treated as new again.
-  assert.equal(buildState({ stateDir: dir, seenWindowDays: 14, nowMs: t0 + 20 * day }).filterNew([{ url: "https://a" }]).length, 1);
+  assert.equal(
+    buildState({ stateDir: dir, seenWindowDays: 14, nowMs: t0 + 20 * day }).filterNew([{ url: "https://a" }]).length,
+    1
+  );
 });

@@ -1,16 +1,7 @@
 {
   "_comment": "Tracked entities for metadata enrichment + negative filters applied at collection time. POSIX-free JS regex.",
   "tracked": {
-    "eip_numbers": [
-      4337,
-      7702,
-      7579,
-      7710,
-      7715,
-      7521,
-      7683,
-      8211
-    ],
+    "eip_numbers": [4337, 7702, 7579, 7710, 7715, 7521, 7683, 8211],
     "eip_pattern": "\\b(ERC|EIP)-?(4337|7702|7579|7710|7715|7521|7683|8211|6900|6492)\\b",
     "protocols": [
       "x402",
@@ -24,44 +15,12 @@
       "Agentic Commerce Protocol"
     ],
     "companies": {
-      "agent_wallets": [
-        "Sponge",
-        "Crossmint",
-        "Coinbase Agent",
-        "Coinbase Agentic"
-      ],
-      "signing_infra": [
-        "Turnkey",
-        "Privy",
-        "Lit Protocol",
-        "Web3Auth"
-      ],
-      "card_issuance": [
-        "Lithic",
-        "Marqeta",
-        "Stripe Issuing"
-      ],
-      "identity": [
-        "Skyfire",
-        "Verax",
-        "EAS",
-        "Ethereum Attestation"
-      ],
-      "aa_infra": [
-        "Pimlico",
-        "ZeroDev",
-        "Alchemy",
-        "Safe",
-        "Biconomy",
-        "Stackup"
-      ],
-      "agentic_ai_x_crypto": [
-        "ai16z",
-        "Eliza",
-        "Virtuals",
-        "Karma3",
-        "OpenRank"
-      ],
+      "agent_wallets": ["Sponge", "Crossmint", "Coinbase Agent", "Coinbase Agentic"],
+      "signing_infra": ["Turnkey", "Privy", "Lit Protocol", "Web3Auth"],
+      "card_issuance": ["Lithic", "Marqeta", "Stripe Issuing"],
+      "identity": ["Skyfire", "Verax", "EAS", "Ethereum Attestation"],
+      "aa_infra": ["Pimlico", "ZeroDev", "Alchemy", "Safe", "Biconomy", "Stackup"],
+      "agentic_ai_x_crypto": ["ai16z", "Eliza", "Virtuals", "Karma3", "OpenRank"],
       "self_custody_wallets": [
         "MetaMask",
         "Coinbase Wallet",

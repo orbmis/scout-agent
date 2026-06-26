@@ -10,9 +10,7 @@ export function buildMetadata(tracked = {}) {
   const trackedTechnicalMarkers = tracked.technical_markers || [];
   const trackedAnchorDomains = tracked.anchor_domains || [];
   const trackedEipNumbers = new Set((tracked.eip_numbers || []).map(Number));
-  const eipPattern = tracked.eip_pattern
-    ? new RegExp(tracked.eip_pattern, "gi")
-    : /\b(?:ERC|EIP)-?(\d{4})\b/gi;
+  const eipPattern = tracked.eip_pattern ? new RegExp(tracked.eip_pattern, "gi") : /\b(?:ERC|EIP)-?(\d{4})\b/gi;
 
   function anchorKeyForUrl(value) {
     try {
@@ -27,7 +25,10 @@ export function buildMetadata(tracked = {}) {
     const key = anchorKeyForUrl(value);
     if (!key) return false;
     return trackedAnchorDomains.some((anchor) => {
-      const a = anchor.toLowerCase().replace(/^https?:\/\//, "").replace(/\/+$/, "");
+      const a = anchor
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/\/+$/, "");
       return key === a || key.startsWith(`${a}/`);
     });
   }
@@ -38,7 +39,10 @@ export function buildMetadata(tracked = {}) {
       // The configured pattern captures the prefix (ERC|EIP) in group 1 and the
       // number in group 2; the default pattern captures the number in group 1.
       // Pick whichever capture group is numeric.
-      const value = match.slice(1).map(Number).find((n) => Number.isFinite(n));
+      const value = match
+        .slice(1)
+        .map(Number)
+        .find((n) => Number.isFinite(n));
       if (Number.isFinite(value)) found.add(value);
     }
     return Array.from(found);
@@ -53,7 +57,11 @@ export function buildMetadata(tracked = {}) {
     const fromUrls = urls
       .filter((url) => anchorMatches(url))
       .map((url) => {
-        try { return new URL(url).hostname.toLowerCase(); } catch { return url; }
+        try {
+          return new URL(url).hostname.toLowerCase();
+        } catch {
+          return url;
+        }
       });
     const fromText = trackedAnchorDomains.filter((d) => lc.includes(d.toLowerCase()));
     const anchor_domain_links = Array.from(new Set([...fromUrls, ...fromText]));

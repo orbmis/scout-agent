@@ -14,7 +14,13 @@ const DEFAULT_TIMEOUT_MS = 30000;
 function fixtureFile(url) {
   const dir = process.env.SCOUT_HTTP_FIXTURES;
   const hash = crypto.createHash("sha1").update(url).digest("hex").slice(0, 16);
-  const host = (() => { try { return new URL(url).hostname; } catch { return "url"; } })();
+  const host = (() => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return "url";
+    }
+  })();
   return path.join(dir, `${host}-${hash}.json`);
 }
 

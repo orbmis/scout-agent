@@ -2,7 +2,15 @@
 
 import { getJson } from "../lib/http.mjs";
 
-export async function collect({ windowHours, sources, secrets, filters, metadata, nowMs = Date.now(), http = { getJson } }) {
+export async function collect({
+  windowHours,
+  sources,
+  secrets,
+  filters,
+  metadata,
+  nowMs = Date.now(),
+  http = { getJson },
+}) {
   const cfg = sources.github || {};
   const diag = { repos_polled: 0, releases: 0, eip_changes: 0 };
   const cutoff = Math.floor(nowMs / 1000) - windowHours * 3600;
@@ -59,7 +67,10 @@ export async function collect({ windowHours, sources, secrets, filters, metadata
         if (!files.length) continue;
 
         const msg = detail.commit?.message || "";
-        const fileSummary = files.slice(0, 20).map((f) => `- ${f.status}: ${f.filename}`).join("\n");
+        const fileSummary = files
+          .slice(0, 20)
+          .map((f) => `- ${f.status}: ${f.filename}`)
+          .join("\n");
         const text = `${msg}\n${fileSummary}`;
         if (!filters.passes(text)) continue;
 

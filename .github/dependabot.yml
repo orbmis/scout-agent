@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # Dev tooling (ESLint/Prettier) — the runtime stays dependency-free.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+  # Keep the GitHub Actions pinned in workflows current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

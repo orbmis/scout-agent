@@ -2,7 +2,7 @@
 // both local diagnosis and CI assertions. Keep this the single source of "health".
 
 const SLOW_RUN_MS = 180000; // healthy collection is 60–90s; warn past 3 min.
-const COLLECTOR_NAMES = ["x_seed", "rss", "github", "arxiv", "telegram"];
+const COLLECTOR_NAMES = ["x_seed", "rss", "github", "arxiv"];
 export const PUBLIC_COLLECTORS = ["rss", "github", "arxiv"]; // no credentials required
 
 // byName: { name: { items: [...], diag: {...}, ms: number } }
@@ -54,7 +54,10 @@ export function canaryVerdict(report) {
   let anyItems = false;
   for (const name of PUBLIC_COLLECTORS) {
     const c = report.collectors[name];
-    if (!c) { failures.push(`${name}: missing from report`); continue; }
+    if (!c) {
+      failures.push(`${name}: missing from report`);
+      continue;
+    }
     if (c.status === "error") failures.push(`${name}: error status`);
     if (c.items > 0) anyItems = true;
   }

@@ -59,7 +59,9 @@ test("scoreItem keeps a strong primary-source item and excludes a thin one", () 
     url: "https://blog.ethereum.org/aa",
     author: { handle: "Ethereum Blog" },
     engagement: {},
-    metadata: extract("ERC-4337 account abstraction bundler paymaster session key smart account", ["https://blog.ethereum.org/aa"]),
+    metadata: extract("ERC-4337 account abstraction bundler paymaster session key smart account", [
+      "https://blog.ethereum.org/aa",
+    ]),
   };
   const thin = {
     source: "x-seed",

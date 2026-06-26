@@ -16,7 +16,6 @@ import { collect as collectX } from "./collectors/x.mjs";
 import { collect as collectRss } from "./collectors/rss.mjs";
 import { collect as collectGithub } from "./collectors/github.mjs";
 import { collect as collectArxiv } from "./collectors/arxiv.mjs";
-import { collect as collectTelegram } from "./collectors/telegram.mjs";
 
 const SCHEMA_VERSION = "1.1";
 
@@ -59,7 +58,6 @@ export async function collect(config, { date, nowMs = Date.now() } = {}) {
     runSafe("rss", () => collectRss(ctx(windows.rss))),
     runSafe("github", () => collectGithub(ctx(windows.github))),
     runSafe("arxiv", () => collectArxiv(ctx(windows.arxiv))),
-    runSafe("telegram", () => collectTelegram(ctx(windows.telegram))),
   ]);
   const collectMs = performance.now() - collectStart;
 
@@ -72,7 +70,6 @@ export async function collect(config, { date, nowMs = Date.now() } = {}) {
     rss: { items_kept: byName.rss.items.length },
     github: { items_kept: byName.github.items.length },
     arxiv: { items_kept: byName.arxiv.items.length },
-    telegram: byName.telegram.diag,
     dedup: { total_before: merged.length, total_after: newItems.length },
   };
 

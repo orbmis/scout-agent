@@ -58,7 +58,8 @@ async function main() {
       const { manifestFile, report } = await collect(config, { date, nowMs: config.nowMs });
       writeReport(config, report, flags.report);
       out({ command: "collect", date, manifest: manifestFile, report });
-      process.exit(report.ok ? 0 : 1);
+      process.exitCode = report.ok ? 0 : 1;
+      return;
     }
 
     case "process": {
@@ -76,7 +77,16 @@ async function main() {
 
       if (fs.existsSync(manifestFile) && fs.statSync(manifestFile).size > 0 && fs.existsSync(markerFile)) {
         const m = JSON.parse(fs.readFileSync(manifestFile, "utf8"));
-        report = { command: "run", date, collection_mode: "reused_manifest", collectors: {}, dedup: m.collection_diagnostics?.dedup || {}, timings: {}, warnings: [], ok: true };
+        report = {
+          command: "run",
+          date,
+          collection_mode: "reused_manifest",
+          collectors: {},
+          dedup: m.collection_diagnostics?.dedup || {},
+          timings: {},
+          warnings: [],
+          ok: true,
+        };
       } else {
         ({ report } = await collect(config, { date, nowMs: config.nowMs }));
         report.collection_mode = "collected";
@@ -84,33 +94,41 @@ async function main() {
 
       const procStart = performance.now();
       const result = processManifest(config, manifestFile);
-      report = withProcess(report, { processResult: result, processMs: performance.now() - procStart, totalMs: performance.now() - totalStart });
+      report = withProcess(report, {
+        processResult: result,
+        processMs: performance.now() - procStart,
+        totalMs: performance.now() - totalStart,
+      });
       writeReport(config, report, flags.report);
       out({ command: "run", date, manifest: manifestFile, report, ...result });
-      process.exit(report.ok ? 0 : 1);
+      process.exitCode = report.ok ? 0 : 1;
+      return;
     }
 
     case "diagnose": {
       const r = await runDiagnostics(config);
       out(r);
-      process.exit(r.summary?.ready_to_collect ? 0 : 1);
+      process.exitCode = r.summary?.ready_to_collect ? 0 : 1;
+      return;
     }
 
     case "doctor": {
       const r = await runDoctor(config);
       out(r);
-      process.exit(r.ok ? 0 : 1);
+      process.exitCode = r.ok ? 0 : 1;
+      return;
     }
 
     case "selftest": {
       const r = runSelftest(config);
       out(r);
-      process.exit(r.ok ? 0 : 1);
+      process.exitCode = r.ok ? 0 : 1;
+      return;
     }
 
     default:
       console.error("usage: scout <collect|process|run|diagnose|doctor|selftest> [arg] [--report f] [--now t]");
-      process.exit(1);
+      process.exitCode = 1;
   }
 }
 

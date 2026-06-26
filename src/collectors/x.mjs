@@ -3,7 +3,15 @@
 
 import { getJson } from "../lib/http.mjs";
 
-export async function collect({ windowHours, sources, secrets, filters, metadata, nowMs = Date.now(), http = { getJson } }) {
+export async function collect({
+  windowHours,
+  sources,
+  secrets,
+  filters,
+  metadata,
+  nowMs = Date.now(),
+  http = { getJson },
+}) {
   const cfg = sources.x || {};
   const diag = { tweets_returned: 0, kept: 0, dropped_timewindow: 0, dropped_filters: 0, status: "ok" };
 
@@ -16,9 +24,7 @@ export async function collect({ windowHours, sources, secrets, filters, metadata
     return { items: [], diag };
   }
 
-  const seedByHandle = new Map(
-    (cfg.seed_authors || []).map((a) => [a.handle.toLowerCase(), a.category])
-  );
+  const seedByHandle = new Map((cfg.seed_authors || []).map((a) => [a.handle.toLowerCase(), a.category]));
 
   const params = new URLSearchParams({
     max_results: String(cfg.max_results || 100),

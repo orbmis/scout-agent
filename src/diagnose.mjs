@@ -25,20 +25,12 @@ export async function runDiagnostics(config) {
     credentials: {
       X_BEARER_TOKEN: Boolean(secrets.X_BEARER_TOKEN),
       GITHUB_TOKEN: Boolean(secrets.GITHUB_TOKEN),
-      TELEGRAM_API_ID: Boolean(secrets.TELEGRAM_API_ID),
-      TELEGRAM_API_HASH: Boolean(secrets.TELEGRAM_API_HASH),
     },
     config: {
       x_list_id: sources.x?.list_id || null,
       seed_authors: (sources.x?.seed_authors || []).length,
       rss_feeds: (sources.rss?.feeds || []).length,
       arxiv_categories: (sources.arxiv?.categories || []).length,
-      telegram_channels: (sources.telegram?.channels || []).length,
-    },
-    telegram: {
-      python_bin: sources.telegram?.python_bin,
-      python_present: Boolean(sources.telegram?.python_bin && fs.existsSync(sources.telegram.python_bin)),
-      session_present: Boolean(sources.telegram?.session_path && fs.existsSync(`${sources.telegram.session_path}.session`)),
     },
   };
 
@@ -48,7 +40,9 @@ export async function runDiagnostics(config) {
     github: await reachable("https://api.github.com/rate_limit", githubHeaders),
     arxiv: await reachable(`${sources.arxiv?.base_url || "https://export.arxiv.org/rss"}/cs.CR`),
     x: secrets.X_BEARER_TOKEN
-      ? await reachable(`https://api.x.com/2/lists/${sources.x.list_id}/tweets?max_results=5`, { Authorization: `Bearer ${secrets.X_BEARER_TOKEN}` })
+      ? await reachable(`https://api.x.com/2/lists/${sources.x.list_id}/tweets?max_results=5`, {
+          Authorization: `Bearer ${secrets.X_BEARER_TOKEN}`,
+        })
       : { url: "x", ok: false, status: "no_token" },
   };
 
@@ -59,7 +53,6 @@ export async function runDiagnostics(config) {
       checks.connectivity.github.ok && "github",
       checks.connectivity.arxiv.ok && "arxiv",
       checks.config.rss_feeds > 0 && "rss",
-      checks.telegram.python_present && checks.telegram.session_present && "telegram",
     ].filter(Boolean),
   };
 

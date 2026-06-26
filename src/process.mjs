@@ -5,10 +5,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { buildMetadata } from "./lib/metadata.mjs";
 import { buildState } from "./lib/state.mjs";
-import { lowerText } from "./lib/text.mjs";
 import { expandFlashbots } from "./editorial/flashbots.mjs";
 import { scoreItem, whyMatter, describeConnect } from "./editorial/score.mjs";
-import { assignTier, threadClusterKey, topicKeyFor, loadPreviousEntries, dedupAgainstPrevious } from "./editorial/cluster.mjs";
+import {
+  assignTier,
+  threadClusterKey,
+  topicKeyFor,
+  loadPreviousEntries,
+  dedupAgainstPrevious,
+} from "./editorial/cluster.mjs";
 import { renderDaily, renderFiltered, titleFor, summarize } from "./editorial/render.mjs";
 
 // Core editorial reduction over manifest items. Pure given (items, previousEntries, extractMetadata).
@@ -26,14 +31,27 @@ export function evaluate(manifestItems, { previousEntries = [], extractMetadata 
     }
     const tier = assignTier(item);
     const clusterKeys = [topicKeyFor(item), ...(threadClusterKey(item) || [])];
-    const existing = clusterKeys.map((key) => intraDayClusters.get(key)).filter(Boolean).sort((a, b) => b.score - a.score)[0];
+    const existing = clusterKeys
+      .map((key) => intraDayClusters.get(key))
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score)[0];
 
     if (existing && existing.score >= score.score) {
-      filtered.push({ item, ...score, exclusionClass: "collapsed_to_cluster", reason: `Another kept item covered the same development more directly (${titleFor(existing.item)}).` });
+      filtered.push({
+        item,
+        ...score,
+        exclusionClass: "collapsed_to_cluster",
+        reason: `Another kept item covered the same development more directly (${titleFor(existing.item)}).`,
+      });
       continue;
     }
     if (existing) {
-      filtered.push({ item: existing.item, ...existing.scoreMeta, exclusionClass: "collapsed_to_cluster", reason: `Another kept item covered the same development more directly (${titleFor(item)}).` });
+      filtered.push({
+        item: existing.item,
+        ...existing.scoreMeta,
+        exclusionClass: "collapsed_to_cluster",
+        reason: `Another kept item covered the same development more directly (${titleFor(item)}).`,
+      });
       kept.splice(existing.keptIndex, 1);
     }
 
@@ -43,12 +61,21 @@ export function evaluate(manifestItems, { previousEntries = [], extractMetadata 
       continue;
     }
 
-    const scoreMeta = { ...score, tier, summary: summarize(item), why: whyMatter(item), connect: describeConnect(item) };
-    for (const key of clusterKeys) intraDayClusters.set(key, { item, score: score.score, scoreMeta, keptIndex: kept.length });
+    const scoreMeta = {
+      ...score,
+      tier,
+      summary: summarize(item),
+      why: whyMatter(item),
+      connect: describeConnect(item),
+    };
+    for (const key of clusterKeys)
+      intraDayClusters.set(key, { item, score: score.score, scoreMeta, keptIndex: kept.length });
     kept.push({ item, ...scoreMeta });
   }
 
-  kept.sort((a, b) => a.tier - b.tier || b.score - a.score || (a.item.created_at || "").localeCompare(b.item.created_at || ""));
+  kept.sort(
+    (a, b) => a.tier - b.tier || b.score - a.score || (a.item.created_at || "").localeCompare(b.item.created_at || "")
+  );
   filtered.sort((a, b) => {
     const order = { below_threshold: 0, missing_anchor_signal: 1, topic_dedup: 2, collapsed_to_cluster: 3 };
     return (order[a.exclusionClass] ?? 9) - (order[b.exclusionClass] ?? 9);
@@ -80,14 +107,25 @@ export function processManifest(config, manifestPath) {
   // Append new Tier 3 authors to rolling state.
   const tier3 = kept
     .filter((entry) => entry.tier === 3 && entry.item.author?.handle)
-    .map((entry) => ({ date: signalDate, handle: entry.item.author.handle, url: entry.item.url, score_axis: entry.dominantAxis, subsource: entry.item.subsource || "" }));
+    .map((entry) => ({
+      date: signalDate,
+      handle: entry.item.author.handle,
+      url: entry.item.url,
+      score_axis: entry.dominantAxis,
+      subsource: entry.item.subsource || "",
+    }));
   state.appendTier3(tier3);
 
   let risingWritten = false;
   if (manifest.weekly_report_due) {
     fs.writeFileSync(
       risingAuthorsPath,
-      [`# Rising Authors — ${signalDate}`, "", "Weekly report requested, but no Tier 3 author crossed the two-appearance threshold in the current local state snapshot.", ""].join("\n")
+      [
+        `# Rising Authors — ${signalDate}`,
+        "",
+        "Weekly report requested, but no Tier 3 author crossed the two-appearance threshold in the current local state snapshot.",
+        "",
+      ].join("\n")
     );
     risingWritten = true;
   }
@@ -103,6 +141,8 @@ export function processManifest(config, manifestPath) {
     risingAuthorsPath,
     keptCount: kept.length,
     filteredCount: filtered.length,
-    strongest: kept.slice(0, 4).map((entry) => ({ title: titleFor(entry.item), url: entry.item.url, tier: entry.tier, score: entry.composite })),
+    strongest: kept
+      .slice(0, 4)
+      .map((entry) => ({ title: titleFor(entry.item), url: entry.item.url, tier: entry.tier, score: entry.composite })),
   };
 }

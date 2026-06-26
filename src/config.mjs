@@ -15,11 +15,6 @@ function intEnv(name, fallback) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-function expandTilde(p) {
-  if (!p) return p;
-  return p.startsWith("~") ? path.join(os.homedir(), p.slice(1)) : p;
-}
-
 // Best-effort load of the secrets file (KEY=VALUE lines). The orchestrator on
 // the host usually sources this into the environment already; we load it too so
 // local/standalone runs work. Existing process.env always wins.
@@ -62,11 +57,6 @@ export function loadConfig() {
 
   const sources = JSON.parse(fs.readFileSync(path.join(repoRoot, "config/sources.json"), "utf8"));
   const editorial = JSON.parse(fs.readFileSync(path.join(repoRoot, "config/editorial.json"), "utf8"));
-  // Expand ~ in telegram paths once, here.
-  if (sources.telegram) {
-    sources.telegram.python_bin = expandTilde(sources.telegram.python_bin);
-    sources.telegram.session_path = expandTilde(sources.telegram.session_path);
-  }
 
   return {
     repoRoot,
@@ -81,13 +71,10 @@ export function loadConfig() {
       rss: intEnv("RSS_HOURS", 48),
       github: intEnv("GITHUB_HOURS", 24),
       arxiv: intEnv("ARXIV_HOURS", 48),
-      telegram: intEnv("TELEGRAM_HOURS", 4),
     },
     secrets: {
       X_BEARER_TOKEN: process.env.X_BEARER_TOKEN || "",
       GITHUB_TOKEN: process.env.GITHUB_TOKEN || "",
-      TELEGRAM_API_ID: process.env.TELEGRAM_API_ID || "",
-      TELEGRAM_API_HASH: process.env.TELEGRAM_API_HASH || "",
     },
     sources,
     editorial,
