@@ -166,13 +166,22 @@ npm run format      # Prettier --write (use format:check in CI)
 scout selftest      # one-command offline proof of the editorial pipeline (golden diff)
 scout diagnose      # live: bins, paths, credentials, source connectivity
 scout doctor        # live: per-feed reachability, GitHub rate limit, X List visibility
+npm run live        # live end-to-end smoke test in a throwaway sandbox (add `-- --keep` to inspect)
 ```
 
-The suite stubs the HTTP layer (`src/lib/http.mjs`) so collectors and the
+The offline suite stubs the HTTP layer (`src/lib/http.mjs`) so collectors and the
 editorial engine run fully offline against fixtures in `test/fixtures/`. To
 refresh fixtures from live data, run any collector with
 `SCOUT_HTTP_MODE=record SCOUT_HTTP_FIXTURES=<dir>`, then replay with
 `SCOUT_HTTP_MODE=replay`.
+
+`npm run live` is the **full live end-to-end test**: it runs the real
+collect→process pipeline against live sources in an isolated sandbox (so the real
+vault and dedup state are never touched), asserts the run report (public sources
+reachable with items, the X collector healthy when a token is present, outputs
+written, no errors), prints a verdict, and exits non-zero on failure. Use it on a
+host with `~/.config/social-scan/.env` to exercise the credentialed X collector —
+the part the secret-free `/live-test` CI canary deliberately can't cover.
 
 **CI workflows:**
 
