@@ -81,11 +81,6 @@
         "note": "Arik Galansky"
       },
       {
-        "handle": "arscontexta",
-        "category": "uncategorised",
-        "note": "Heinrich"
-      },
-      {
         "handle": "ASI_Alliance",
         "category": "uncategorised",
         "note": "Artificial Superintelligence Alliance"
@@ -586,20 +581,6 @@
       {
         "name": "CryptoSlate - DeFi",
         "url": "https://cryptoslate.com/defi/feed",
-        "max_items_per_run": 5,
-        "tag": "newsletter",
-        "group": "newsletters"
-      },
-      {
-        "name": "Crypto.news - wallets",
-        "url": "https://crypto.news/tag/wallet/feed/",
-        "max_items_per_run": 5,
-        "tag": "newsletter",
-        "group": "newsletters"
-      },
-      {
-        "name": "The Block",
-        "url": "https://www.theblock.co/rss.xml",
         "max_items_per_run": 5,
         "tag": "newsletter",
         "group": "newsletters"
