@@ -81,11 +81,6 @@
         "note": "Arik Galansky"
       },
       {
-        "handle": "arscontexta",
-        "category": "uncategorised",
-        "note": "Heinrich"
-      },
-      {
         "handle": "ASI_Alliance",
         "category": "uncategorised",
         "note": "Artificial Superintelligence Alliance"
@@ -591,20 +586,6 @@
         "group": "newsletters"
       },
       {
-        "name": "Crypto.news - wallets",
-        "url": "https://crypto.news/tag/wallet/feed/",
-        "max_items_per_run": 20,
-        "tag": "tracked_press",
-        "group": "tracked_press"
-      },
-      {
-        "name": "The Block",
-        "url": "https://www.theblock.co/rss.xml",
-        "max_items_per_run": 5,
-        "tag": "newsletter",
-        "group": "newsletters"
-      },
-      {
         "name": "CoinDesk",
         "url": "https://www.coindesk.com/arc/outboundfeeds/rss",
         "max_items_per_run": 5,
@@ -627,28 +608,10 @@
         "group": "core_protocol"
       },
       {
-        "name": "Vitalik Blog",
-        "url": "https://vitalik.eth.limo/feed.xml",
-        "max_items_per_run": 2,
-        "group": "core_protocol"
-      },
-      {
         "name": "Stripe",
         "url": "https://stripe.com/blog/feed.rss",
         "max_items_per_run": 2,
         "group": "company_blogs"
-      },
-      {
-        "name": "Delta Network",
-        "url": "https://blog.delta.network/rss",
-        "max_items_per_run": 2,
-        "group": "company_blogs"
-      },
-      {
-        "name": "ethresear.ch - Account Abstraction",
-        "url": "https://ethresear.ch/tag/account-abstraction.rss",
-        "max_items_per_run": 10,
-        "group": "forums"
       },
       {
         "name": "Ethereum Magicians",

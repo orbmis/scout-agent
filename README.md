@@ -26,13 +26,13 @@ Two decoupled halves joined by a JSON **manifest**:
                  config/sources.json        config/editorial.json
                          │                          │
    ┌─────────────────────┴──────────────────────────┴───────────┐
-   │  scout collect   (the mechanical half — no judgement)       │
-   │       x · rss · github · arxiv  →  merge  →  dedup          │
+   │  scout collect   (the mechanical half — no judgement)      │
+   │       x · rss · github · arxiv  →  merge  →  dedup         │
    └─────────────────────────────┬──────────────────────────────┘
                                  │  manifest-YYYY-MM-DD.json  (+ ready-*.marker)
    ┌─────────────────────────────┴──────────────────────────────┐
-   │  scout process  (the editorial half — deterministic)        │
-   │    score → tier (0–3) → dedup vs 14 days → render Markdown  │
+   │  scout process  (the editorial half — deterministic)       │
+   │    score → tier (0–3) → dedup vs 14 days → render Markdown │
    └─────────────────────────────┬──────────────────────────────┘
                                  │
                 Signals/YYYY-MM-DD.md   +   YYYY-MM-DD_filtered.md
