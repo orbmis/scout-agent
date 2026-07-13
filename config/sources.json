@@ -627,28 +627,10 @@
         "group": "core_protocol"
       },
       {
-        "name": "Vitalik Blog",
-        "url": "https://vitalik.eth.limo/feed.xml",
-        "max_items_per_run": 2,
-        "group": "core_protocol"
-      },
-      {
         "name": "Stripe",
         "url": "https://stripe.com/blog/feed.rss",
         "max_items_per_run": 2,
         "group": "company_blogs"
-      },
-      {
-        "name": "Delta Network",
-        "url": "https://blog.delta.network/rss",
-        "max_items_per_run": 2,
-        "group": "company_blogs"
-      },
-      {
-        "name": "ethresear.ch - Account Abstraction",
-        "url": "https://ethresear.ch/tag/account-abstraction.rss",
-        "max_items_per_run": 10,
-        "group": "forums"
       },
       {
         "name": "Ethereum Magicians",
