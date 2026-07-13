@@ -68,7 +68,7 @@ export function loadConfig() {
     seenWindowDays: intEnv("SCOUT_SEEN_WINDOW_DAYS", 14),
     windows: {
       x_seed: intEnv("SEED_HOURS", 24),
-      rss: intEnv("RSS_HOURS", 48),
+      rss: intEnv("RSS_HOURS", 120),
       github: intEnv("GITHUB_HOURS", 24),
       arxiv: intEnv("ARXIV_HOURS", 48),
     },

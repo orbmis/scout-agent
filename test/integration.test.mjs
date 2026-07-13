@@ -25,6 +25,8 @@ test("collect orchestrates offline, writes a valid manifest, sets the weekly fla
   assert.deepEqual(validateManifest(manifest), []);
   assert.equal(manifest.date_utc, "2026-06-28");
   assert.equal(manifest.weekly_report_due, true);
+  assert.equal(manifest.window_hours.rss, 120);
+  assert.ok(Array.isArray(manifest.collection_diagnostics.rss.per_feed));
   assert.equal(report.ok, true); // no collector hard-errored
   assert.equal(report.dedup.total_before, 0);
   assert.ok(report.warnings.some((w) => w.code === "zero_items_all_sources"));
@@ -62,6 +64,8 @@ test("diagnose and doctor return structured, deterministic results offline", asy
   const diag = await runDiagnostics(config);
   assert.equal(typeof diag.summary.ready_to_collect, "boolean");
   assert.equal(diag.config.seed_authors, 111);
+  assert.equal(diag.config.rss_window_hours, 120);
+  assert.equal(diag.config.rss_max_items_per_run["Crypto.news - wallets"], 20);
 
   const doc = await runDoctor(config);
   assert.ok(Array.isArray(doc.checks));

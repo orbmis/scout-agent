@@ -270,7 +270,7 @@ export function scoreItem(item) {
     item.source === "github" ||
     item.source === "arxiv" ||
     (item.source === "rss" &&
-      ["research_outputs", "core_protocol", "forums", "company_blogs"].includes(item.group || "")) ||
+      ["research_outputs", "core_protocol", "forums", "company_blogs", "tracked_press"].includes(item.group || "")) ||
     (metadata.anchor_domain_links || []).length > 0 ||
     (engagement.seed_engaged_by || []).length > 0 ||
     !!author.is_seed_author ||

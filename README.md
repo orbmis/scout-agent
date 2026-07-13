@@ -119,7 +119,7 @@ an explicit `status` in the diagnostics — the run still succeeds.
 | `SCOUT_MANIFEST_DIR`                                        | `/tmp/scout`               | manifest + marker location     |
 | `SCOUT_STATE_DIR`                                           | `~/.local/share/scout`     | rolling URL/author state       |
 | `SCOUT_SEEN_WINDOW_DAYS`                                    | `14`                       | URL dedup window               |
-| `SEED_HOURS` / `RSS_HOURS` / `GITHUB_HOURS` / `ARXIV_HOURS` | 24 / 48 / 24 / 48          | per-collector lookback         |
+| `SEED_HOURS` / `RSS_HOURS` / `GITHUB_HOURS` / `ARXIV_HOURS` | 24 / 120 / 24 / 48         | per-collector lookback         |
 
 ## Run
 
@@ -140,8 +140,11 @@ pins the clock for reproducible runs.
 
 Every `collect`/`run` also writes a machine-readable health report to
 `$SCOUT_STATE_DIR/last-run.json` — per-collector counts, statuses, timings, and
-`warnings[]` (e.g. `slow_run`, `collector_error`, `zero_items_all_sources`). This
-is the single artifact both humans and CI read.
+`warnings[]` (e.g. `slow_run`, `collector_error`, `zero_items_all_sources`). The
+manifest now also includes RSS per-feed diagnostics so omissions are explicit at
+collection time: fetched entries, kept items, and drops from the time window,
+category filter, blocked-text filter, and feed cap. This is the single artifact
+both humans and CI read.
 
 ### Scheduling
 

@@ -593,9 +593,9 @@
       {
         "name": "Crypto.news - wallets",
         "url": "https://crypto.news/tag/wallet/feed/",
-        "max_items_per_run": 5,
-        "tag": "newsletter",
-        "group": "newsletters"
+        "max_items_per_run": 20,
+        "tag": "tracked_press",
+        "group": "tracked_press"
       },
       {
         "name": "The Block",

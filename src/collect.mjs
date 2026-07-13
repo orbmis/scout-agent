@@ -67,7 +67,13 @@ export async function collect(config, { date, nowMs = Date.now() } = {}) {
 
   const diagnostics = {
     x_seed: { items_kept: byName.x_seed.items.length, status: byName.x_seed.diag.status },
-    rss: { items_kept: byName.rss.items.length },
+    rss: {
+      items_kept: byName.rss.items.length,
+      feeds_polled: byName.rss.diag.feeds_polled,
+      successful: byName.rss.diag.successful,
+      failed: byName.rss.diag.failed,
+      per_feed: byName.rss.diag.per_feed || [],
+    },
     github: { items_kept: byName.github.items.length },
     arxiv: { items_kept: byName.arxiv.items.length },
     dedup: { total_before: merged.length, total_after: newItems.length },

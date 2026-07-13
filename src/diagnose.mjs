@@ -30,6 +30,8 @@ export async function runDiagnostics(config) {
       x_list_id: sources.x?.list_id || null,
       seed_authors: (sources.x?.seed_authors || []).length,
       rss_feeds: (sources.rss?.feeds || []).length,
+      rss_window_hours: config.windows?.rss ?? null,
+      rss_max_items_per_run: Object.fromEntries((sources.rss?.feeds || []).map((feed) => [feed.name, feed.max_items_per_run ?? 10])),
       arxiv_categories: (sources.arxiv?.categories || []).length,
     },
   };
