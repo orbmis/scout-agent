@@ -31,8 +31,11 @@ export function runSelftest(config, { update = process.env.SCOUT_SELFTEST_UPDATE
   processManifest(derived, manifestPath);
 
   const mismatches = [];
-  for (const name of [`${date}.md`, `${date}_filtered.md`]) {
-    const produced = normalize(fs.readFileSync(path.join(signalsDir, name), "utf8"));
+  for (const [name, dir] of [
+    [`${date}.md`, signalsDir],
+    [`${date}_filtered.md`, tmp],
+  ]) {
+    const produced = normalize(fs.readFileSync(path.join(dir, name), "utf8"));
     const goldenFile = path.join(GOLDEN_DIR, name);
     if (update) {
       fs.writeFileSync(goldenFile, produced);

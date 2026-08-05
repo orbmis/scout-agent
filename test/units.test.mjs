@@ -76,3 +76,24 @@ test("scoreItem keeps a strong primary-source item and excludes a thin one", () 
   assert.equal(scoreItem(strong).exclusionClass, null);
   assert.ok(scoreItem(thin).exclusionClass);
 });
+
+test("scoreItem keeps substantive newsletter wallet-security coverage", () => {
+  const { extract } = buildMetadata(editorial.tracked);
+  const text =
+    "Bitcoin cold-wallet attack spreads as Galaxy Research flags weak Coldcard-generated keys and ongoing sweeps.";
+  const item = {
+    source: "rss",
+    group: "newsletters",
+    tag: "newsletter",
+    subsource: "CoinDesk",
+    title: "Bitcoin cold-wallet attack spreads to 4,500 addresses as losses near $89 million",
+    text,
+    url: "https://www.coindesk.com/tech/2026/08/02/bitcoin-cold-wallet-attack-spreads-to-4-500-addresses-as-losses-near-usd89-million",
+    author: { handle: "CoinDesk" },
+    engagement: {},
+    metadata: extract(text, []),
+  };
+
+  assert.ok(item.metadata.technical_markers.includes("cold wallet"));
+  assert.equal(scoreItem(item).exclusionClass, null);
+});

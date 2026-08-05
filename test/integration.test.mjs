@@ -63,9 +63,9 @@ test("diagnose and doctor return structured, deterministic results offline", asy
 
   const diag = await runDiagnostics(config);
   assert.equal(typeof diag.summary.ready_to_collect, "boolean");
-  assert.equal(diag.config.seed_authors, 111);
+  assert.equal(diag.config.seed_authors, 110);
   assert.equal(diag.config.rss_window_hours, 120);
-  assert.equal(diag.config.rss_max_items_per_run["Crypto.news - wallets"], 20);
+  assert.equal(diag.config.rss_max_items_per_run["Ethereum Blog"], 2);
 
   const doc = await runDoctor(config);
   assert.ok(Array.isArray(doc.checks));

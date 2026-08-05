@@ -6,7 +6,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-test("processManifest writes daily + filtered files and removes the marker", async () => {
+test("processManifest writes the daily note to Signals, writes filtered beside the manifest, and removes the marker", async () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "scout-e2e-"));
   const signalsDir = path.join(tmp, "Signals");
   const manifestDir = path.join(tmp, "manifest");
@@ -88,6 +88,8 @@ test("processManifest writes daily + filtered files and removes the marker", asy
   assert.ok(result.filteredCount >= 1, "thin item filtered");
   assert.ok(fs.existsSync(result.dailyPath));
   assert.ok(fs.existsSync(result.filteredPath));
+  assert.equal(path.dirname(result.dailyPath), signalsDir);
+  assert.equal(path.dirname(result.filteredPath), manifestDir);
   assert.match(fs.readFileSync(result.dailyPath, "utf8"), /Tier 0 — Primary Source/);
   assert.ok(!fs.existsSync(path.join(manifestDir, `ready-${date}.marker`)), "marker removed on success");
 });

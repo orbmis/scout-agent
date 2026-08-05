@@ -7,6 +7,14 @@ import { textFor, hasAnyKeyword } from "../lib/text.mjs";
 export const trackedTopicPatterns = [
   /agentic commerce/i,
   /agent wallet/i,
+  /wallets?/i,
+  /wallet security/i,
+  /self[- ]custody/i,
+  /hardware wallet/i,
+  /cold[- ]wallet/i,
+  /hot[- ]wallet/i,
+  /seed phrase/i,
+  /recovery phrase/i,
   /account abstraction/i,
   /smart account/i,
   /session key/i,
@@ -266,11 +274,17 @@ export function scoreItem(item) {
     (metadata.technical_markers || []).length > 0,
     !!metadata.has_code_block,
   ].filter(Boolean).length;
+  const hasNewsletterTopicSignal =
+    item.source === "rss" &&
+    item.group === "newsletters" &&
+    strongContentSpecificityCount >= 1 &&
+    hasAnyKeyword(text, trackedTopicPatterns);
   const hasRequiredAnchorSignal =
     item.source === "github" ||
     item.source === "arxiv" ||
     (item.source === "rss" &&
       ["research_outputs", "core_protocol", "forums", "company_blogs", "tracked_press"].includes(item.group || "")) ||
+    hasNewsletterTopicSignal ||
     (metadata.anchor_domain_links || []).length > 0 ||
     (engagement.seed_engaged_by || []).length > 0 ||
     !!author.is_seed_author ||

@@ -105,8 +105,10 @@ Each item gets a composite score across four axes, plus a topical gate.
 **Topical gate:** an item must reach `topical ≥ 2` **and** clear a source
 threshold (`4` for github/rss, `5` otherwise), **and** carry at least one
 _required anchor signal_ — one of: github/arxiv source; RSS from a primary group;
-non-empty `anchor_domain_links`; `seed_engaged_by`; `is_seed_author`; or ≥2 strong
-content-specificity flags. Items satisfying none never surface, regardless of score.
+non-empty `anchor_domain_links`; `seed_engaged_by`; `is_seed_author`; ≥2 strong
+content-specificity flags; or, for RSS newsletters only, one strong
+content-specificity flag plus an on-topic keyword match. Items satisfying none
+never surface, regardless of score.
 
 Each item is labelled `weak | moderate | strong` with a dominant axis.
 
@@ -138,7 +140,7 @@ Written to `signals_dir` every run:
   engagement, summary, why-it-matters, score, dominant axis, optional
   "Connects to …" annotation), then collection diagnostics, then an editorial note.
   Empty tiers state _why_ using the diagnostics, never a bare "no items".
-- **`YYYY-MM-DD_filtered.md`** — every excluded item with its exclusion class
+- **`$SCOUT_MANIFEST_DIR/YYYY-MM-DD_filtered.md`** — every excluded item with its exclusion class
   (`below_threshold`, `missing_anchor_signal`, `topic_dedup`,
   `collapsed_to_cluster`), reason, and scoring note. For auditing/tuning.
 - **`rising-authors-YYYY-MM-DD.md`** — on Sundays only.

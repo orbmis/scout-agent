@@ -98,9 +98,10 @@ export function processManifest(config, manifestPath) {
   const { kept, filtered } = evaluate(manifest.items || [], { previousEntries, extractMetadata: metadata.extract });
 
   const dailyPath = path.join(signalsDir, `${signalDate}.md`);
-  const filteredPath = path.join(signalsDir, `${signalDate}_filtered.md`);
+  const filteredPath = path.join(config.manifestDir, `${signalDate}_filtered.md`);
   const risingAuthorsPath = path.join(signalsDir, `rising-authors-${signalDate}.md`);
 
+  fs.mkdirSync(config.manifestDir, { recursive: true });
   fs.writeFileSync(dailyPath, renderDaily({ signalDate, manifest, manifestPath, kept }));
   fs.writeFileSync(filteredPath, renderFiltered({ signalDate, kept, filtered }));
 

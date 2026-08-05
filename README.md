@@ -35,7 +35,7 @@ Two decoupled halves joined by a JSON **manifest**:
    │    score → tier (0–3) → dedup vs 14 days → render Markdown │
    └─────────────────────────────┬──────────────────────────────┘
                                  │
-                Signals/YYYY-MM-DD.md   +   YYYY-MM-DD_filtered.md
+                Signals/YYYY-MM-DD.md   +   $SCOUT_MANIFEST_DIR/YYYY-MM-DD_filtered.md
 ```
 
 `scout run` does both (reusing today's manifest if it already exists).
@@ -115,8 +115,8 @@ an explicit `status` in the diagnostics — the run still succeeds.
 | Variable                                                    | Default                    | Purpose                        |
 | ----------------------------------------------------------- | -------------------------- | ------------------------------ |
 | `OPENCLAW_WORKSPACE`                                        | repo root                  | workspace root (for `USER.md`) |
-| `SCOUT_SIGNALS_DIR`                                         | `~/obsidian-vault/Signals` | where signal files are written |
-| `SCOUT_MANIFEST_DIR`                                        | `/tmp/scout`               | manifest + marker location     |
+| `SCOUT_SIGNALS_DIR`                                         | `~/obsidian-vault/Signals` | where the daily signal note is written |
+| `SCOUT_MANIFEST_DIR`                                        | `/tmp/scout`               | manifest, marker, and filtered output location |
 | `SCOUT_STATE_DIR`                                           | `~/.local/share/scout`     | rolling URL/author state       |
 | `SCOUT_SEEN_WINDOW_DAYS`                                    | `14`                       | URL dedup window               |
 | `SEED_HOURS` / `RSS_HOURS` / `GITHUB_HOURS` / `ARXIV_HOURS` | 24 / 120 / 24 / 48         | per-collector lookback         |

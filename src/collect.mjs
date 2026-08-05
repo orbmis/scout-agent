@@ -102,10 +102,6 @@ export async function collect(config, { date, nowMs = Date.now() } = {}) {
   const manifestFile = path.join(manifestDir, `manifest-${date}.json`);
   const markerFile = path.join(manifestDir, `ready-${date}.marker`);
   fs.writeFileSync(manifestFile, JSON.stringify(manifest, null, 2));
-  fs.writeFileSync(
-    path.join(signalsDir, `manifest-${date}.md`),
-    `# Manifest - ${date}\n\n\`\`\`json\n${JSON.stringify(manifest, null, 2)}\n\`\`\`\n`
-  );
 
   // Commit dedup state only after the manifest is safely written.
   state.markUrls(newItems);

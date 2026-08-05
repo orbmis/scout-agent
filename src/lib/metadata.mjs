@@ -51,6 +51,7 @@ export function buildMetadata(tracked = {}) {
   function extract(text = "", urls = []) {
     const normalizedText = stripHtml(decodeHtml(text));
     const lc = normalizedText.toLowerCase();
+    const lcFolded = lc.replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
     const eipNumbers = extractTrackedEipNumbers(normalizedText);
 
     // Anchor links: from real URLs (preferred) plus any anchor domain mentioned in the text.
@@ -73,7 +74,10 @@ export function buildMetadata(tracked = {}) {
       anchor_domain_links,
       tracked_companies: trackedCompanies.filter((c) => lc.includes(c.toLowerCase())),
       tracked_protocols: trackedProtocols.filter((p) => lc.includes(p.toLowerCase())),
-      technical_markers: trackedTechnicalMarkers.filter((m) => lc.includes(m.toLowerCase())),
+      technical_markers: trackedTechnicalMarkers.filter((m) => {
+        const marker = m.toLowerCase();
+        return lc.includes(marker) || lcFolded.includes(marker);
+      }),
     };
   }
 
